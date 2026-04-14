@@ -35,7 +35,7 @@ export default function Header() {
             href="/pricing"
             className="text-sm text-muted transition hover:text-cream"
           >
-            Pricing
+            Pricing (free for personal use)
           </Link>
           <a
             href="https://github.com/visionpipe"
@@ -100,7 +100,7 @@ export default function Header() {
               className="text-sm text-muted transition hover:text-cream"
               onClick={() => setMenuOpen(false)}
             >
-              Pricing
+              Pricing (free for personal use)
             </Link>
             <a
               href="https://github.com/visionpipe"
