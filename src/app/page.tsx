@@ -470,9 +470,9 @@ export default function Home() {
                 </tr>
               </thead>
               <tbody>
-                {competitors.map((c) => (
+                {competitors.map((c, i) => (
                   <tr
-                    key={c.name}
+                    key={i}
                     className={`border-b border-white/5 ${c.highlight ? "bg-teal/10" : ""}`}
                   >
                     <td
