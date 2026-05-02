@@ -385,7 +385,7 @@ Expected: FAIL — `Cannot find module '../schema'`
 - [ ] **Step 4: Create `src/db/schema.ts` (minimal — make tests pass)**
 
 ```typescript
-import { bigserial, text, integer, timestamp, jsonb, pgTable, uniqueIndex, check } from 'drizzle-orm/pg-core';
+import { bigserial, bigint, text, integer, timestamp, jsonb, pgTable, uniqueIndex, check } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 
 export const organizations = pgTable('organizations', {
@@ -401,7 +401,7 @@ export const organizations = pgTable('organizations', {
 
 export const memberships = pgTable('memberships', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
-  orgId: bigserial('org_id', { mode: 'number' }).notNull().references(() => organizations.id, { onDelete: 'cascade' }),
+  orgId: bigint('org_id', { mode: 'number' }).notNull().references(() => organizations.id, { onDelete: 'cascade' }),
   clerkUserId: text('clerk_user_id').notNull(),
   role: text('role').notNull().default('owner'),
   joinedAt: timestamp('joined_at', { withTimezone: true }).notNull().defaultNow(),
@@ -412,7 +412,7 @@ export const memberships = pgTable('memberships', {
 
 export const purchases = pgTable('purchases', {
   id: bigserial('id', { mode: 'number' }).primaryKey(),
-  orgId: bigserial('org_id', { mode: 'number' }).notNull().references(() => organizations.id),
+  orgId: bigint('org_id', { mode: 'number' }).notNull().references(() => organizations.id),
   stripeCheckoutSessionId: text('stripe_checkout_session_id').unique(),
   stripePaymentIntentId: text('stripe_payment_intent_id').unique(),
   sku: text('sku').notNull(),

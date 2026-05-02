@@ -4,6 +4,29 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 03:48 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Fixed a bug in the schema where FK columns (`orgId` in `memberships` and `purchases`) were incorrectly typed as `bigserial` instead of `bigint`. `bigserial` creates an auto-incrementing sequence which is wrong for FK columns — only PK columns should be `bigserial`. The schema was corrected, the plan file updated to match, a fresh migration was generated and applied to Neon, and the DB was verified.
+
+### Detail of changes made:
+
+- `src/db/schema.ts`: Added `bigint` to the `drizzle-orm/pg-core` import. Changed `orgId` in `memberships` from `bigserial` to `bigint` (keeping `.notNull().references(() => organizations.id, { onDelete: 'cascade' })`). Changed `orgId` in `purchases` from `bigserial` to `bigint` (keeping `.notNull().references(() => organizations.id)`). PK `id` columns remain `bigserial` as correct.
+- Deleted stale broken migration `drizzle/0000_loose_betty_ross.sql` and `drizzle/meta/` directory.
+- Ran `npx drizzle-kit generate` — produced `drizzle/0000_fat_omega_red.sql` with correct `bigint NOT NULL` for both FK columns (not `bigserial`).
+- Ran `npx drizzle-kit migrate` with `DATABASE_URL` from `.env.local` — migration applied successfully to Neon. Note: `drizzle.config.ts` uses `dotenv/config` which reads `.env` not `.env.local`, so `DATABASE_URL` must be passed explicitly in the env when running drizzle-kit commands.
+- `docs/superpowers/plans/2026-05-02-stripe-credit-billing-phase-1.md` updated: changed `bigserial('org_id'...)` to `bigint('org_id'...)` in both `memberships` and `purchases`, and added `bigint` to the import line.
+- DB verified: tables `memberships, organizations, purchases, webhook_events` confirmed present. Sequences are exactly the 4 PK sequences (`memberships_id_seq`, `organizations_id_seq`, `purchases_id_seq`, `webhook_events_id_seq`) — no spurious FK sequences.
+- 3 schema tests still pass after the fix.
+
+### Potential concerns to address:
+
+- `drizzle.config.ts` uses `dotenv/config` which only reads `.env`, not `.env.local`. Any developer or CI script running `drizzle-kit` commands must manually set `DATABASE_URL` in the environment. Consider documenting this or switching to a custom dotenv setup that reads `.env.local`.
+- The `__drizzle_migrations` table does not appear in `information_schema.tables` (likely because Drizzle creates it in a different schema or with different permissions). This is normal Drizzle behavior but worth knowing.
+
+---
+
 ## Progress Update as of 2026-05-02 03:42 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
