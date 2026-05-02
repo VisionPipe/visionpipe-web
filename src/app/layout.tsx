@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { IBM_Plex_Sans, Source_Code_Pro } from "next/font/google";
+import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import "./globals.css";
@@ -36,15 +37,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${ibmPlexSans.variable} ${sourceCodePro.variable}`}
-    >
-      <body className="font-sans antialiased">
-        <Header />
-        <main className="pt-16">{children}</main>
-        <Footer />
-      </body>
-    </html>
+    <ClerkProvider>
+      <html
+        lang="en"
+        className={`${ibmPlexSans.variable} ${sourceCodePro.variable}`}
+      >
+        <body className="font-sans antialiased">
+          <Header />
+          <main className="pt-16">{children}</main>
+          <Footer />
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

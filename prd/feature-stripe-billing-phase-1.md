@@ -4,6 +4,25 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:01 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task C1 complete: created Clerk middleware and wrapped the root layout with `<ClerkProvider>`. Dev server starts clean (HTTP 200), all 8 tests still pass, `npx tsc --noEmit` clean.
+
+### Detail of changes made:
+
+- `src/middleware.ts`: new file — exports `clerkMiddleware` with a `createRouteMatcher` protecting `/dashboard(.*)` and `/api/me(.*)`. All other routes are public. Matcher config follows the standard Clerk Next.js pattern (excludes static assets and Next.js internals).
+- `src/app/layout.tsx`: added `import { ClerkProvider } from "@clerk/nextjs"` and wrapped the `<html>` root element with `<ClerkProvider>`. All existing content (fonts, metadata, Header, main pt-16, Footer) preserved exactly.
+- Smoke test confirmed: `npm run dev` starts without Clerk errors, `curl http://localhost:3000` returns 200.
+
+### Potential concerns to address:
+
+- `ClerkProvider` wraps `<html>` (not `<body>`), which is the documented Next.js App Router pattern — Clerk requires it at the outermost level to support server components. No issues expected.
+- Protected routes (`/dashboard`, `/api/me`) don't exist yet — they'll be built in C2/C3 and later API tasks. The middleware will correctly 401 any attempt to hit them before they're built.
+
+---
+
 ## Progress Update as of 2026-05-02 03:56 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
