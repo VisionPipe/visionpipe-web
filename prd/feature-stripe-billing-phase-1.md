@@ -4,6 +4,29 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:32 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task E3 complete: implemented `POST /api/checkout` which creates a Stripe Checkout session for a given credit pack SKU. Two spec deviations were required due to Stripe API rejections discovered during smoke testing — both are documented below.
+
+### Detail of changes made:
+
+- `src/app/api/checkout/route.ts`: new file — App Router POST handler with `nodejs` runtime. Validates SKU via `isValidSku`, looks up the org/Stripe customer ID via Clerk userId → memberships → organizations, creates a Stripe Checkout session in `payment` mode with pack priceId, success/cancel URLs, and metadata (sku, credits, amountCents, orgId if available). Returns `{ url }` for the Checkout URL.
+- **Deviation 1 — `allowed_countries` removed:** spec included `allowed_countries: ['US'] as any` at the top level of `stripe.checkout.sessions.create()`. Stripe rejected it with `parameter_unknown` (400, `StripeInvalidRequestError`). The field does not exist at that level in the Stripe Sessions API. Removed entirely — US-only enforcement is a Stripe dashboard/Tax setting concern, not a code-level param.
+- **Deviation 2 — `automatic_tax` commented out:** spec included `automatic_tax: { enabled: true }`. Stripe rejected it in test mode with "You must have a valid head office address to enable automatic tax calculation in test mode." The test-mode Stripe Tax settings at `https://dashboard.stripe.com/test/settings/tax` need a head office address configured before this can be enabled. Left as a commented-out line with a URL to the relevant Stripe dashboard page.
+- Smoke test results: happy path (`pack_10`) → 200 + valid `https://checkout.stripe.com/c/pay/cs_test_...` URL; invalid SKU (`pack_999`) → 400 `{"error":"invalid sku"}`; empty body → 400 `{"error":"invalid sku"}`.
+- `npx tsc --noEmit`: clean (no `as any` needed once `allowed_countries` was removed).
+- Test suite: 16 tests passing (no new tests; smoke test serves as E3 verification per plan).
+
+### Potential concerns to address:
+
+- `automatic_tax` is disabled until the Stripe test-mode head office address is configured at `https://dashboard.stripe.com/test/settings/tax`. Without it, Stripe Checkout will not compute or collect sales tax. Must be re-enabled before production launch.
+- US-only restriction (originally via `allowed_countries`) has no enforcement at the code level. If country restriction is needed, it must be configured in the Stripe dashboard (payment method restrictions or Stripe Radar rules). Deferred per spec guidance.
+- `customer_email: stripeCustomerId ? undefined : undefined` is a no-op (both branches return `undefined`). This was in the spec verbatim — presumably a placeholder for a future Clerk email lookup. No behavior change now, but a future task should either populate it or remove the dead code.
+
+---
+
 ## Progress Update as of 2026-05-02 04:28 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
