@@ -4,6 +4,24 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:45 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task E8 complete: created `GET /api/checkout/status` polling endpoint. Smoke tests pass. tsc clean.
+
+### Detail of changes made:
+
+- `src/app/api/checkout/status/route.ts`: new file. `nodejs` runtime. Returns 400 `{"error":"missing session_id"}` if `session_id` query param is missing. Queries `purchases` by `stripeCheckoutSessionId`; returns `{"status":"pending"}` if not found, or `{"status":"complete","credits":N,"sku":"..."}` if found and status is `complete` (any other status still returns `pending`).
+- Smoke test results: `curl .../api/checkout/status` → `{"error":"missing session_id"}` (400); `curl .../api/checkout/status?session_id=cs_test_nonexistent` → `{"status":"pending"}` (200). Both correct.
+
+### Potential concerns to address:
+
+- No authentication on this endpoint — anyone with a valid `session_id` can poll it. Session IDs are unguessable Stripe opaque tokens (`cs_*`), so this is acceptable. Would need auth if purchase metadata became sensitive.
+- Returns `pending` for `refunded`/`partially_refunded` statuses — by design, the success page only needs to know if credits were granted. Future polish could expose refund status separately.
+
+---
+
 ## Progress Update as of 2026-05-02 04:44 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
