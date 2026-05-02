@@ -4,6 +4,28 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:03 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task C2 complete: created Clerk sign-in and sign-up pages with themed catch-all routes. Both routes return HTTP 200. All 8 tests still pass, TypeScript clean. Manual magic-link signup test deferred to user (per task spec).
+
+### Detail of changes made:
+
+- `src/app/sign-in/[[...sign-in]]/page.tsx`: new file — exports `SignInPage` component that renders Clerk's `<SignIn>` component centered on a forest-green background. Custom appearance config applies deep-forest + white border styling to the card element.
+- `src/app/sign-up/[[...sign-up]]/page.tsx`: new file — exports `SignUpPage` component that renders Clerk's `<SignUp>` component with identical layout and styling as sign-in page.
+- Smoke test confirmed: `npm run dev` started successfully, `curl http://localhost:3000/sign-in` returns 200, `curl http://localhost:3000/sign-up` returns 200, dev server stopped cleanly.
+- Test suite: `npm test` shows all 8 tests passing (3 schema + 5 queries), no regression.
+- Type check: `npx tsc --noEmit` clean, no TypeScript errors.
+
+### Potential concerns to address:
+
+- Clerk's internal routes (verify, factor-one, etc.) will work automatically via the catch-all `[[...]]` directory naming — no additional routing needed.
+- The `appearance` prop's custom styling (`bg-deep-forest border border-white/10`) assumes Clerk's Tailwind integration is active in the app; ClerkProvider (from C1) provides the necessary context.
+- Magic-link signup test (Step 4 of the task plan) requires external Clerk dashboard config (enabling email/magic-link providers) — this is user-facing external setup, not code, so skipped per task spec.
+
+---
+
 ## Progress Update as of 2026-05-02 04:01 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
