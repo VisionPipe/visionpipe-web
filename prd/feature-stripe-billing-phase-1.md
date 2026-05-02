@@ -4,6 +4,28 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:28 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task E2 complete: webhook handler skeleton with signature verification and idempotency, implemented TDD (failing test first, then implementation). Also added `@/` path alias to `vitest.config.ts` — this was necessary because the route uses `@/lib/stripe` and `@/db/client` imports, which Vitest couldn't resolve without the alias. Total tests now 16 (was 14).
+
+### Detail of changes made:
+
+- `src/app/api/stripe/webhook/__tests__/route.test.ts`: two tests covering the signature-rejection paths (missing header → 400, invalid signature → 400). Written before the route existed to confirm red-state failure.
+- `src/app/api/stripe/webhook/route.ts`: Next.js App Router POST handler with `force-dynamic` + `nodejs` runtime directives. Returns 400 for missing/invalid Stripe signatures, inserts into `webhookEvents` with `.onConflictDoNothing()` for idempotency, dispatches on event type with TODO stubs for E5/E6/E7.
+- `vitest.config.ts`: added `resolve.alias` mapping `@` → `./src` so Vitest can resolve `@/*` imports (same as tsconfig paths). Also added `import path from 'path'`. This was not needed by previous tests (all used relative imports) but is required by the route under test.
+- `event as any` cast in DB insert is intentional — `Stripe.Event` doesn't satisfy Drizzle's jsonb input type without it. Per spec, not to be fixed here.
+- Both tests exercise only the early-return 400 paths — no DB or live Stripe calls are made during the test suite.
+
+### Potential concerns to address:
+
+- The `stderr` output during `npm test` shows the `StripeSignatureVerificationError` stack trace from the "invalid signature" test. This is expected (the `console.error` in the catch block) and not a test failure — tests pass 2/2. Could suppress with `vi.spyOn(console, 'error').mockImplementation(() => {})` in the test, but spec says YAGNI on extra test polish.
+- `STRIPE_WEBHOOK_SECRET` must be set in `.env.local` (and Vercel env) for the handler to work in non-test contexts. The `!` non-null assertion in `process.env.STRIPE_WEBHOOK_SECRET!` means a missing env var will pass `undefined` to `constructEvent`, which Stripe will reject with a verification error (400) rather than crashing — acceptable behavior but worth noting.
+- Handler stubs for `checkout.session.completed`, `charge.refunded`, `charge.dispute.created` are empty TODOs to be filled by E5/E6/E7.
+
+---
+
 ## Progress Update as of 2026-05-02 04:08 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
