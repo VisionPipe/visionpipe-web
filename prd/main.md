@@ -4,6 +4,43 @@ This document tracks progress on the `main` branch of the VisionPipe website. It
 
 ---
 
+## Progress Update as of 2026-05-02 02:36 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Wrote the implementation plan for Phase 1 Stripe credit billing. The plan is committed at `docs/superpowers/plans/2026-05-02-stripe-credit-billing-phase-1.md` and breaks the spec into ~30 atomic tasks across 9 phases (branch+deps, database, Clerk, pricing/Stripe, checkout, dashboard, customer portal, Resend, pre-launch). Plan assumes implementation happens on a new branch `feature/stripe-billing-phase-1` with its own progress log at `prd/feature-stripe-billing-phase-1.md` (per the CLAUDE.md branch-name convention), and merges back to main as a squash commit when complete.
+
+### Detail of changes made:
+
+- **Created `docs/superpowers/plans/2026-05-02-stripe-credit-billing-phase-1.md`** — full bite-sized implementation plan with code blocks for every step, exact file paths, and TDD discipline (write-failing-test → run → implement → verify → commit) for each unit of work.
+- **Plan structure:**
+  - Phase A: branch + dependencies (Clerk, Stripe, Drizzle, Neon HTTP driver, Resend, Vitest)
+  - Phase B: Neon setup, Drizzle config, schema (4 tables), migration, getBalance query
+  - Phase C: Clerk middleware + ClerkProvider + sign-in/sign-up pages + Header auth UI
+  - Phase D: Stripe Products in dashboard, pricing constants module, Stripe client helper
+  - Phase E: webhook handler skeleton, POST /api/checkout, credit pack components on /pricing, then 3 webhook handlers (checkout.session.completed, charge.refunded, charge.dispute.created), plus /api/checkout/status polling endpoint and /checkout/success + /checkout/cancel pages
+  - Phase F: GET /api/me/balance, GET /api/me/purchases, dashboard page, full purchase history page
+  - Phase G: Stripe Customer Portal config + POST /api/me/billing-portal + dashboard button
+  - Phase H: Resend domain verification + magic link delivery test
+  - Phase I: production setup checklist (Vercel domain, Clerk prod instance, Stripe live mode, Neon prod DB, Vercel env vars, smoke test) + squash-merge to main
+- **Self-review run:** spec coverage verified (all 9 sections mapped to tasks), placeholder scan clean (the 3 TODO markers in the webhook route are intentional — they get replaced in subsequent tasks), type consistency checked (function/method/field names match across tasks).
+- **Estimated effort:** 1.5–2 weeks part-time, faster full-time.
+- **Files created this commit:**
+  - `docs/superpowers/plans/2026-05-02-stripe-credit-billing-phase-1.md` — the plan
+- **Files modified this commit:**
+  - `prd/main.md` — this entry
+
+### Potential concerns to address:
+
+- **Plan assumes a feature branch but it doesn't exist yet.** Task A1 creates `feature/stripe-billing-phase-1` as the very first step. Until that branch is cut, no implementation should happen.
+- **The plan asks the founder to do several manual external steps** that can't be automated by an agent: creating Neon project, creating Stripe Products in test and live modes, setting up Resend domain DNS verification, configuring Clerk allowed origins, creating webhook endpoints, copying secret keys into `.env.local`. These are flagged inline in their respective tasks but the founder should expect to do them.
+- **Stripe SDK API version pinning** — the plan pins to `2025-01-27.acacia`. Whoever executes this should check the current Stripe Node SDK README and use whatever version it documents at execution time.
+- **Clerk SDK method names** — `signInTokens.createSignInToken`, `users.getUserList`, `users.getOrganizationMembershipList` reflect the SDK API as of plan-write time. The Clerk SDK occasionally renames things; executor should sanity-check against current docs.
+- **Test coverage in the plan is uneven.** Strong TDD coverage on `getBalance`, pricing constants, and webhook signature verification. Webhook handler bodies have placeholder DB-backed test stubs that the executor should flesh out (or rely on manual smoke tests).
+- **`public/downloads/` DMGs** still in working tree, untouched. Plan does not address them.
+
+---
+
 ## Progress Update as of 2026-05-02 02:22 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
