@@ -4,6 +4,28 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:07 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task D2 complete: added pricing constants module (`src/lib/pricing.ts`) using TDD discipline. Wrote the failing test first, confirmed the "Cannot find module" red state, then implemented the module to make all 6 new tests pass. Total test suite is now 14 tests across 3 files.
+
+### Detail of changes made:
+
+- `src/lib/__tests__/pricing.test.ts`: new file — 6 tests across 3 describe blocks: `PACKS` (exposes 4 packs, matches spec amounts), `getPack` (returns pack for valid SKU, returns undefined for invalid), `isValidSku` (true for known SKUs, false for unknown/empty/null).
+- `src/lib/pricing.ts`: new file — exports `PackSku` union type, `Pack` interface, `PACKS` record (4 entries: pack_10/20/50/100 with priceId from env, credits, amountCents, displayName), `isValidSku` type-guard, and `getPack` helper.
+- TDD discipline followed: confirmed "Failed to load url ../pricing" failure before writing the implementation.
+- Credit amounts per spec: pack_10=1000 credits/$10, pack_20=2200/$20 (10% bonus), pack_50=5750/$50 (15% bonus), pack_100=12000/$100 (20% bonus).
+- `priceId` fields read from `process.env.STRIPE_PRICE_PACK_{10,20,50,100}` — values are present in `.env.local` with real test-mode Stripe price IDs.
+- Test count: 14 total (3 schema + 5 queries + 6 pricing), all passing.
+
+### Potential concerns to address:
+
+- `priceId` uses the non-null assertion operator (`!`) on `process.env.STRIPE_PRICE_PACK_*`. If env vars are missing at runtime, `priceId` will be `undefined` (not a runtime error at module-load time). The Stripe client helper (D3) and checkout API (E2) will surface the error when they try to use the priceId. Consider adding a startup check if this becomes an issue.
+- `PACKS` is evaluated at module-load time in the test environment; `process.env` is populated by the `dotenv` call in `vitest.config.ts`, so the real price IDs are injected. Tests don't assert on `priceId` values (correct — they'd be brittle), only on credits/amountCents.
+
+---
+
 ## Progress Update as of 2026-05-02 04:05 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
