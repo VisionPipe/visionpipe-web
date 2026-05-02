@@ -4,6 +4,24 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 02:46 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Created `.env.example` with all placeholder environment variables needed for Phase 1 (Clerk, Neon, Stripe, Resend, App URL). Created `.env.local` as an empty copy of the template — it is gitignored and will NOT be committed. The founder must paste real values from each service's dashboard before running the app locally.
+
+### Detail of changes made:
+
+- Created `.env.example` (tracked) with placeholder vars for: `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `DATABASE_URL`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_PACK_10/20/50/100`, `RESEND_API_KEY`, `NEXT_PUBLIC_APP_URL`
+- Created `.env.local` (gitignored, NOT committed) as a blank-values copy of `.env.example` — confirmed ignored by `.gitignore` line 22 rule `.env*.local`
+
+### Potential concerns to address:
+
+- Real values must be filled in `.env.local` after external setup tasks complete: Clerk (B1), Neon (D1), Stripe (H1), Resend (E1). App will not start until at minimum `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, and `DATABASE_URL` are set.
+- Stripe price IDs (`STRIPE_PRICE_PACK_*`) will only be known after creating products in the Stripe dashboard (task H1) — leave blank until then.
+
+---
+
 ## Progress Update as of 2026-05-02 02:45 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
