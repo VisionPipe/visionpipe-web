@@ -4,6 +4,22 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:55 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task F4 complete: created `/dashboard/purchases` full purchase history page. One file, reuses `PurchaseHistory` with no limit. tsc clean.
+
+### Detail of changes made:
+
+- `src/app/dashboard/purchases/page.tsx`: server component. "← Back to dashboard" link at top, "All purchases" heading, then `<PurchaseHistory />` (no limit prop — shows everything). Max-width 5xl to accommodate the wider table. Protected by middleware (same Clerk intercept behavior as other dashboard routes).
+
+### Potential concerns to address:
+
+- Same "No purchases yet." flash as the dashboard page — `PurchaseHistory` starts with empty rows before fetch completes.
+
+---
+
 ## Progress Update as of 2026-05-02 04:54 PM PDT (F3)
 *(Most recent updates at top)*
 ### Summary of changes since last update
