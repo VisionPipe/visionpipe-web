@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     line_items: [{ price: pack.priceId, quantity: 1 }],
     success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${appUrl}/checkout/cancel`,
-    // automatic_tax: { enabled: true }, // Requires head office address in Stripe Tax settings; enable after configuring https://dashboard.stripe.com/test/settings/tax
+    automatic_tax: { enabled: true },
     customer: stripeCustomerId,
     customer_email: stripeCustomerId ? undefined : undefined,
     metadata: {

@@ -4,6 +4,60 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:58 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Re-enabled `automatic_tax: { enabled: true }` in `src/app/api/checkout/route.ts` — founder configured Stripe Tax in the dashboard (head office: California, preset product category: Digital products → Software → Downloadable, taxes-on-shipping determine automatically, tax-inclusive pricing automatic). Smoke-tested: POST /api/checkout with pack_10 now returns a valid Stripe Checkout URL with automatic tax enabled.
+
+### Detail of changes made:
+
+- `src/app/api/checkout/route.ts`: removed the `// automatic_tax disabled` comment and re-enabled the line `automatic_tax: { enabled: true },`. Verified by curling POST /api/checkout — returned `{"url":"https://checkout.stripe.com/c/pay/cs_test_..."}` (200 OK, Stripe accepted the param).
+
+### Phase E + F + G recap (since the last milestone summary at 03:56 PM PDT)
+
+This block summarizes 21 commits delivered between 04:01 PM and 04:56 PM PDT — Phases C (Clerk), D (Stripe pricing), E (checkout flow), F (dashboard), G (Customer Portal) all landed.
+
+**Phase C (Clerk):**
+- C1 (e3c4f2d): Clerk middleware + ClerkProvider in root layout. Protected routes: `/dashboard(.*)`, `/api/me(.*)`.
+- C2 (f16ec61): /sign-in and /sign-up catch-all pages with Clerk's SignIn/SignUp components.
+- C3 (a491e00): Header.tsx — added SignedOut "Sign in" link, SignedIn Dashboard link + UserButton, in both desktop nav and mobile menu.
+
+**Phase D (pricing + Stripe):**
+- D2 (179e137): `src/lib/pricing.ts` with PACKS constant + getPack/isValidSku helpers + 6 TDD tests.
+- D3 (b3f5ba6): `src/lib/stripe.ts` — apiVersion bumped from spec's `2025-01-27.acacia` to `2025-02-24.acacia` (matches stripe@17.7.0 SDK type).
+
+**Phase E (checkout flow):**
+- E2 (5da0b97): Webhook skeleton with signature verification + idempotency log via `webhookEvents`. Vitest config aliased `@` → `./src` to resolve route imports.
+- E3 (ce372f7): POST /api/checkout. Spec deviations: `allowed_countries` removed (Stripe rejected as unknown param — US-only enforcement deferred to Radar/dashboard rules); `automatic_tax` initially disabled because no head office address (resolved in this commit, see above).
+- E4 (1fbbf6d): CreditPackCard + CreditPacksSection components, integrated into /pricing (Commercial card CTA now scrolls to packs section).
+- E5 (0e7dc03): `handleCheckoutCompleted` — find/create Clerk user, find/create Clerk org, upsert local org+membership, insert purchase. Idempotent via `onConflictDoNothing` on stripeCheckoutSessionId. Email helper at `src/lib/email.ts` no-ops when RESEND_API_KEY missing. Vitest set to `fileParallelism: false` to fix race between webhook-handlers test (truncates orgs) and queries test (truncates orgs).
+- E6 (fa64afd): `handleChargeRefunded` — sets status to refunded/partially_refunded with proportional credit reduction.
+- E7 (51a858f): `handleDisputeCreated` — logs + sends dispute alert (no-op until Resend live).
+- E8 (728cd89): GET /api/checkout/status polling endpoint.
+- E9 (5af79a6): /checkout/success client page polling /api/checkout/status; redirects signed-in users to /dashboard after 1.5s, instructs signed-out users to check email.
+- E10 (f0c036e): /checkout/cancel page.
+
+**Phase F (dashboard):**
+- F1 (3451b8b): GET /api/me/balance.
+- F2 (d3c30f3): GET /api/me/purchases (ordered by createdAt desc).
+- F3 (3510f4d): /dashboard page with BalanceDisplay (top stat) + PurchaseHistory (last 5).
+- F4 (0dfd00a): /dashboard/purchases full history table.
+
+**Phase G (Customer Portal):**
+- G2 (b536c1b): POST /api/me/billing-portal returns a Stripe Customer Portal URL. `handleCheckoutCompleted` extended to save `stripeCustomerId` on the org row on first checkout. BillingPortalButton rendered on /dashboard.
+
+### Potential concerns to address:
+
+- **G1 (Stripe Customer Portal config) still pending user action.** Until the founder enables the portal at `https://dashboard.stripe.com/test/settings/billing/portal` (and again in live mode), POST /api/me/billing-portal will surface a Stripe API error after a real purchase. Code is correct — config is missing.
+- **US-only enforcement is NOT implemented at the API level.** `allowed_countries: ['US']` rejected by Stripe as unknown param in E3. Needs Radar rules or dashboard-level payment-method-country restrictions before public launch.
+- **Resend (Phase H) deferred.** `RESEND_API_KEY` missing → magic-link emails post-purchase silently no-op (with console.warn). Founder needs to verify domain at https://resend.com and set the key before public launch.
+- **Manual end-to-end smoke tests deferred to founder.** No subagent has actually run the full `stripe listen` → buy → webhook → DB → magic link → /dashboard flow. Should be the first thing tested in a real browser before merging.
+- **Polling on /checkout/success has no timeout ceiling.** If webhook never fires, the page polls forever. Phase 2 follow-up.
+- **Test isolation for CI.** Vitest tests truncate the real Neon DB in beforeEach. `fileParallelism: false` papers over the cross-file race; for CI, use a separate test branch / schema or wrap in transactions that roll back.
+
+---
+
 ## Progress Update as of 2026-05-02 04:56 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
