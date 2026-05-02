@@ -2,10 +2,9 @@ import type Stripe from 'stripe';
 import { db } from '@/db/client';
 import { organizations, memberships, purchases } from '@/db/schema';
 import { eq } from 'drizzle-orm';
-import { sendDisputeAlert } from './email';
+import { sendMagicLink, sendDisputeAlert } from './email';
 import { getPack, isValidSku } from './pricing';
 import { findOrCreateUserByEmail, findOrCreateOrgForUser, createSignInToken } from './clerk-backend';
-import { sendMagicLink } from './email';
 
 export async function handleCheckoutCompleted(session: Stripe.Checkout.Session): Promise<void> {
   const sku = session.metadata?.sku;

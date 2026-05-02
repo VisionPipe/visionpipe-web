@@ -4,6 +4,24 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:44 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task E7 complete: `handleDisputeCreated` was already added to `webhook-handlers.ts` and wired into the route in the E6 step. This commit cleans up a duplicate `email` import (merged `sendMagicLink` and `sendDisputeAlert` into a single import line). All 20 tests pass, tsc clean.
+
+### Detail of changes made:
+
+- `src/lib/webhook-handlers.ts`: merged two separate `import { ... } from './email'` lines into one `import { sendMagicLink, sendDisputeAlert } from './email'`. `handleDisputeCreated` logs the dispute ID/amount/reason at warn level and calls `sendDisputeAlert` (no-ops when `RESEND_API_KEY` is absent).
+- `src/app/api/stripe/webhook/route.ts`: `case 'charge.dispute.created':` dispatches to `handleDisputeCreated` (already in place from E6 commit).
+- Full test suite: 20 tests across 5 files, all passing.
+
+### Potential concerns to address:
+
+- `sendDisputeAlert` no-ops when `RESEND_API_KEY` is missing (current state). Dispute alerts won't be sent until Resend is configured. The `console.warn` log will still fire, so the event won't be silently lost.
+
+---
+
 ## Progress Update as of 2026-05-02 04:43 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
