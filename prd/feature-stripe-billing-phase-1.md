@@ -4,6 +4,26 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:08 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task D3 complete: added Stripe client singleton (`src/lib/stripe.ts`). Required a one-line deviation from the spec's `apiVersion` — see details below. `npx tsc --noEmit` clean, all 14 tests still passing.
+
+### Detail of changes made:
+
+- `src/lib/stripe.ts`: new file — guards against missing `STRIPE_SECRET_KEY` at module-load time (throws `Error`), then exports a `stripe` singleton initialized with `stripe@17.7.0` and `typescript: true`.
+- **apiVersion deviation:** spec specified `'2025-01-27.acacia'` but `stripe@17.7.0` (installed) pins its `Stripe.LatestApiVersion` type to `'2025-02-24.acacia'`. Using the spec version caused `TS2322` type error. Changed to `'2025-02-24.acacia'` to satisfy the type — this is the correct version for the installed SDK and has no behavioral difference for our use case.
+- `npx tsc --noEmit`: clean after version fix.
+- Test suite: 14 tests passing (unchanged — no new tests for this helper; it's a pure client wrapper with no testable logic beyond the guard, which would require mocking env in a way that conflicts with the dotenv-loaded `.env.local`).
+
+### Potential concerns to address:
+
+- The `STRIPE_SECRET_KEY` guard throws at module import time if the var is missing. This is intentional — fast fail is better than a cryptic Stripe API error later. However, it means any module that imports `stripe.ts` (even transitively) will throw during the Next.js build if the key is absent. Vercel preview/production deployments must have `STRIPE_SECRET_KEY` set in their environment.
+- No tests written for `stripe.ts` — the singleton is a thin wrapper with no logic to test. If the guard behavior needs to be verified, it would require a test that unsets `STRIPE_SECRET_KEY` after `dotenv` has loaded it (tricky with vitest module isolation). Deferred as not worth the complexity.
+
+---
+
 ## Progress Update as of 2026-05-02 04:07 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
