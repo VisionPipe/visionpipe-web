@@ -4,6 +4,24 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:46 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task E9 complete: created `/checkout/success` page with polling. Smoke test returned 200. tsc clean. No Suspense boundary needed.
+
+### Detail of changes made:
+
+- `src/app/checkout/success/page.tsx`: `'use client'` page. Uses `useSearchParams` to read `session_id`, polls `/api/checkout/status` every 1s until `status === 'complete'`, then shows credit count and (if signed in) redirects to `/dashboard` after 1.5s. If not signed in, shows email-for-sign-in-link message. Renders a "missing session ID" fallback if param is absent. Styled with `bg-forest`, `text-cream`, `text-muted` tokens.
+- Suspense boundary: not required. Next.js 15 `useSearchParams` Suspense warning applies to static pages; this `'use client'` page is dynamically rendered via client-side JS, so no build error or warning occurred. Confirmed by 200 smoke test and clean tsc.
+
+### Potential concerns to address:
+
+- The polling loop has no upper bound — if the webhook never fires (e.g. Stripe outage), the page will poll indefinitely. A timeout after ~30s with a "contact support" fallback would be a good Phase 2 improvement.
+- `/dashboard` does not exist yet — the `router.push('/dashboard')` redirect for signed-in users will land on a 404 until the dashboard page is built.
+
+---
+
 ## Progress Update as of 2026-05-02 04:45 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
