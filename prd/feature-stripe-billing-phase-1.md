@@ -4,6 +4,23 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 03:49 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Quality-of-life follow-up to B4: made `drizzle.config.ts` read `.env.local` automatically, and added `tsconfig.tsbuildinfo` to `.gitignore`. Now `npx drizzle-kit migrate`/`generate` work with no extra env wiring.
+
+### Detail of changes made:
+
+- `drizzle.config.ts`: replaced `import 'dotenv/config'` (which only reads `.env`) with `import { config } from 'dotenv'; config({ path: '.env.local' });`. Verified by running `npx drizzle-kit migrate` — output shows `injected env (12) from .env.local` and migration applied successfully (no-op since already applied).
+- `.gitignore`: added `tsconfig.tsbuildinfo` (a TypeScript incremental-build artifact that was showing up untracked after running `npx tsc --noEmit`).
+
+### Potential concerns to address:
+
+- None. Resolves the concern raised in the previous entry about needing to pass `DATABASE_URL` explicitly when running drizzle-kit.
+
+---
+
 ## Progress Update as of 2026-05-02 03:48 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
