@@ -4,6 +4,25 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:54 PM PDT (F3)
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task F3 complete: created `BalanceDisplay` and `PurchaseHistory` client components and the `/dashboard` page wiring them together with a "Buy more credits" card and a "View all →" link. tsc clean. Smoke test returns Clerk dev-mode intercept (expected).
+
+### Detail of changes made:
+
+- `src/components/BalanceDisplay.tsx`: `'use client'` component. Fetches `/api/me/balance` on mount, shows `—` while loading, then renders the balance as a large teal number. Styled with `bg-deep-forest`, `text-teal`, `text-muted` tokens.
+- `src/components/PurchaseHistory.tsx`: `'use client'` component. Fetches `/api/me/purchases` on mount, renders "No purchases yet." when empty, otherwise renders a table with Date/Pack/Credits/Amount/Status/Expires columns. Accepts optional `limit` prop to slice the display rows. Styled with `text-cream`, `text-muted`, `border-white/5`.
+- `src/app/dashboard/page.tsx`: server component. Two-column grid at top (BalanceDisplay + "Buy more credits" card with `/pricing#credit-packs` link). Below that, a "Recent purchases" section with `<PurchaseHistory limit={5} />` and a "View all →" link to `/dashboard/purchases`.
+- Smoke test: `GET /dashboard` returns Clerk dev-mode intercept (same pattern as `/api/me/*` routes) — correct, as `/dashboard(.*)` is a protected route in middleware.
+
+### Potential concerns to address:
+
+- `PurchaseHistory` shows "No purchases yet." immediately on first render (before fetch completes) because `rows` starts as `[]`. A loading state would prevent the flash. Acceptable for Phase 1.
+
+---
+
 ## Progress Update as of 2026-05-02 04:54 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
