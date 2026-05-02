@@ -4,6 +4,24 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:54 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task F2 complete: created `GET /api/me/purchases` — returns all purchases for the user's org, ordered newest-first. Smoke behavior identical to F1 (Clerk dev-mode intercept — expected). tsc clean.
+
+### Detail of changes made:
+
+- `src/app/api/me/purchases/route.ts`: new file. `nodejs` runtime. Authenticates via `auth()`, looks up membership by `clerkUserId`, returns `{ purchases: [] }` if no membership, otherwise selects all purchases for the org ordered by `createdAt DESC` and returns `{ purchases: rows }`.
+- Smoke test: same Clerk dev-mode 404 behavior as F1 — expected and acceptable per spec.
+- `npx tsc --noEmit`: clean.
+
+### Potential concerns to address:
+
+- No pagination — returns all purchases for the org. For orgs with many purchases this could become a large payload. Acceptable for Phase 1 (pagination is Phase 2).
+
+---
+
 ## Progress Update as of 2026-05-02 04:53 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
