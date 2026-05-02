@@ -4,6 +4,32 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 03:42 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Defined the Drizzle ORM schema (TDD) for all four core tables: `organizations`, `memberships`, `purchases`, and `webhook_events`. Added Vitest config and test scripts; wrote failing tests first, then implemented the schema to make them pass.
+
+### Detail of changes made:
+
+- Created `src/db/__tests__/schema.test.ts` — 3 tests verifying exports and key column presence; ran against non-existent schema first to confirm red state
+- Created `vitest.config.ts` with `environment: 'node'` and `globals: false`
+- Added `"test": "vitest run"` and `"test:watch": "vitest"` scripts to `package.json`
+- Created `src/db/schema.ts` with four Drizzle `pgTable` exports:
+  - `organizations`: `id`, `clerkOrgId` (unique), `stripeCustomerId` (unique), `type` (personal/team check), `name`, `createdAt`
+  - `memberships`: `id`, `orgId` (FK → organizations, cascade delete), `clerkUserId`, `role` (owner/admin/member check), `joinedAt`; unique index on (orgId, clerkUserId)
+  - `purchases`: `id`, `orgId` (FK → organizations), `stripeCheckoutSessionId`, `stripePaymentIntentId`, `sku`, `creditsPurchased`, `amountCents`, `currency`, `status` (pending/complete/refunded/partially_refunded check), `refundedCredits`, `expiresAt`, `createdAt`, `completedAt`
+  - `webhookEvents`: `id`, `stripeEventId` (unique), `eventType`, `payload` (jsonb), `processedAt`
+- All 3 tests pass: `vitest run` exits 0
+
+### Potential concerns to address:
+
+- The CJS build deprecation warning from Vite is cosmetic — vitest 2.x still supports it, no action needed until vitest 3.x.
+- `check()` constraints are defined in schema but Drizzle doesn't enforce them in TypeScript — only at the DB level after migration. Column types are `text`, so invalid values won't be caught without the DB constraint being applied.
+- B4 (drizzle-kit generate + migrate) is needed before any runtime code can rely on these tables existing in Neon.
+
+---
+
 ## Progress Update as of 2026-05-02 03:40 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
