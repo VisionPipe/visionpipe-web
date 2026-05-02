@@ -4,6 +4,31 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:40 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task E5 complete (TDD): implemented the `checkout.session.completed` webhook handler with Clerk user/org provisioning, DB purchase record insertion, and post-purchase magic link email. All 18 tests pass; tsc clean.
+
+### Detail of changes made:
+
+- `src/lib/clerk-backend.ts`: thin wrappers around Clerk Backend API — `findOrCreateUserByEmail`, `findOrCreateOrgForUser`, `createSignInToken`. `clerkClient()` is awaited (returns `Promise<ClerkClient>`). `getOrganizationMembershipList` used on `client.users` (userId param), not `client.organizations` (organizationId param) — important distinction from docs examples.
+- `src/lib/email.ts`: Resend wrapper with `sendMagicLink` and `sendDisputeAlert`. Gracefully no-ops (logs a warning) when `RESEND_API_KEY` is missing — current production state since Resend is deferred. Magic links will not be sent until the key is added.
+- `src/lib/webhook-handlers.ts`: `handleCheckoutCompleted` — validates SKU, checks amount_total against expected pack amountCents (throws `amount mismatch` if wrong), upserts org + membership in DB, inserts purchase row with `onConflictDoNothing` on `stripeCheckoutSessionId` for idempotency, calls `createSignInToken` + `sendMagicLink`.
+- `src/lib/__tests__/webhook-handlers.test.ts`: 2 TDD tests — (1) amount mismatch rejection, (2) valid purchase happy path hitting real Neon DB and asserting `findOrCreateUserByEmail` was called. Mocks: `clerk-backend` and `email` entirely mocked; DB is real.
+- `src/app/api/stripe/webhook/route.ts`: wired up `handleCheckoutCompleted` in `case 'checkout.session.completed':` block.
+- `vitest.config.ts`: added `fileParallelism: false` to prevent FK race conditions between test files sharing the real Neon DB (both `webhook-handlers.test.ts` and `queries.test.ts` delete/insert organizations; concurrent deletes violate FK from purchases table).
+- Manual end-to-end test (Stripe CLI `stripe listen` + real Checkout flow) deferred to user.
+
+### Potential concerns to address:
+
+- **Clerk mock vs real SDK shape**: tests mock `clerk-backend` entirely, so tests pass regardless of real Clerk API behavior. If `getOrganizationMembershipList` returns a different structure at runtime (e.g., `memberships.data[0].organization` is undefined), the production code path will throw. Worth an integration test or manual verification once Clerk is fully configured.
+- **Email no-op**: `RESEND_API_KEY` is not set — post-purchase magic links are silently skipped. Users who buy won't receive a sign-in link until the key is added. This is intentional for Phase 1 but should be resolved before public launch.
+- **SignInToken URL**: `token.url ?? ''` — if Clerk returns an empty url (shouldn't happen per types, `url` is non-optional on `SignInToken`), the magic link will be a blank href. Low risk but worth monitoring.
+- **Test fileParallelism: false**: adds ~2-3s to full test suite run time due to sequential file execution. Acceptable now; revisit if the suite grows large.
+
+---
+
 ## Progress Update as of 2026-05-02 04:35 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update

@@ -14,5 +14,7 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: false,
+    // DB-touching tests share a real Neon instance; serialize to avoid FK race conditions
+    fileParallelism: false,
   },
 });

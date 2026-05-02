@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/db/client';
 import { webhookEvents } from '@/db/schema';
+import { handleCheckoutCompleted } from '@/lib/webhook-handlers';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -34,7 +35,7 @@ export async function POST(req: Request) {
   // Dispatch by event type — handlers added in Tasks E5, E6, E7
   switch (event.type) {
     case 'checkout.session.completed':
-      // TODO Task E5
+      await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
       break;
     case 'charge.refunded':
       // TODO Task E6
