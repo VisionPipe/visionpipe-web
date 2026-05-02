@@ -4,6 +4,28 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:05 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task C3 complete: added Clerk auth UI (`SignedIn`, `SignedOut`, `UserButton`) to the Header in both desktop nav and mobile menu.
+
+### Detail of changes made:
+
+- `src/components/Header.tsx`: added `import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs"`. In the desktop nav (`hidden md:flex`), inserted a `<SignedOut>` block rendering a "Sign in" link to `/sign-in` and a `<SignedIn>` block rendering a "Dashboard" link to `/dashboard` plus `<UserButton afterSignOutUrl="/" />`. Both inserted after the GitHub link and before the Download CTA. Same structure mirrored in the mobile menu's `flex flex-col gap-4` column at the same position.
+- **Visual deviation from spec (intentional):** plan spec used `text-cream hover:text-teal transition-colors` for auth links. Used `text-sm text-muted transition hover:text-cream` instead to match the existing Features/Pricing/GitHub link pattern, keeping visual consistency.
+- **SSR note:** Clerk's `SignedIn`/`SignedOut` components are client-side — they do not appear in the initial SSR HTML payload. The "Sign in" link renders after JS hydration. Smoke test confirmed HTTP 200 and Clerk JS config embedded in HTML (`signInUrl` etc.). This is expected Clerk behavior.
+- `Link` import was already present; no double-import issue.
+- TypeScript check: `npx tsc --noEmit` clean.
+- Test suite: `npm test` — all 8 tests passing (3 schema + 5 queries), no regression.
+
+### Potential concerns to address:
+
+- Clerk's client-side-only rendering means "Sign in" is not present in the SSR HTML — any SEO or crawler that depends on seeing the auth nav links in raw HTML will not see them. Acceptable for this use case (header nav links are not indexed content).
+- `UserButton` in the mobile menu renders inline within a `flex flex-col` column — visually it will be left-aligned at the column's start. This is a minor layout quirk; no custom wrapper was added per task spec ("Clerk's UserButton is small enough to render inline in the column").
+
+---
+
 ## Progress Update as of 2026-05-02 04:03 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update

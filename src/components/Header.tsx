@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -58,6 +59,23 @@ export default function Header() {
               />
             </svg>
           </a>
+          <SignedOut>
+            <Link
+              href="/sign-in"
+              className="text-sm text-muted transition hover:text-cream"
+            >
+              Sign in
+            </Link>
+          </SignedOut>
+          <SignedIn>
+            <Link
+              href="/dashboard"
+              className="text-sm text-muted transition hover:text-cream"
+            >
+              Dashboard
+            </Link>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
           <a
             href="/#hero"
             className="rounded-lg bg-teal px-4 py-2 text-sm font-medium text-cream transition hover:bg-teal-light"
@@ -111,6 +129,25 @@ export default function Header() {
             >
               GitHub ↗
             </a>
+            <SignedOut>
+              <Link
+                href="/sign-in"
+                className="text-sm text-muted transition hover:text-cream"
+                onClick={() => setMenuOpen(false)}
+              >
+                Sign in
+              </Link>
+            </SignedOut>
+            <SignedIn>
+              <Link
+                href="/dashboard"
+                className="text-sm text-muted transition hover:text-cream"
+                onClick={() => setMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              <UserButton afterSignOutUrl="/" />
+            </SignedIn>
             <a
               href="/#hero"
               className="inline-block rounded-lg bg-teal px-4 py-2 text-center text-sm font-medium text-cream transition hover:bg-teal-light"
