@@ -4,6 +4,28 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 03:52 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task B5 complete: added the Drizzle DB client (`src/db/client.ts`), implemented `getBalance` query (`src/db/queries.ts`), and wrote 5 integration tests using TDD discipline. Also extended `vitest.config.ts` to load `.env.local` so `DATABASE_URL` is available during test runs. All 8 tests pass (3 schema + 5 query).
+
+### Detail of changes made:
+
+- `src/db/client.ts`: new file — creates the Neon HTTP client and Drizzle instance with schema. Exported as `db` for use by all query modules.
+- `src/db/queries.ts`: new file — exports `getBalance(orgId: number): Promise<number>`. Uses a single SQL `SUM(credits_purchased - refunded_credits)` aggregation with filters: status IN ('complete', 'partially_refunded') AND expires_at > NOW(). Returns 0 for orgs with no qualifying purchases.
+- `src/db/__tests__/queries.test.ts`: new file — 5 integration tests verifying: zero balance for no purchases, correct sum for complete purchases, correct subtraction of refunded credits, exclusion of expired purchases, exclusion of pending purchases. Each test uses a fresh org created in `beforeEach` (full delete + re-insert).
+- `vitest.config.ts`: added `import { config } from 'dotenv'; config({ path: '.env.local' });` at top-level so `DATABASE_URL` is injected before Vitest resolves modules. Verified via the `injected env (12) from .env.local` message in test output.
+- TDD discipline followed: confirmed `Cannot find module '../queries'` failure before writing `queries.ts`.
+
+### Potential concerns to address:
+
+- Integration tests hit the real Neon database. The `beforeEach` deletes ALL purchases and organizations before each test, which is fine now (only test data exists) but would be destructive if run against a production DB. Consider separate test DB or schema isolation for CI when real data exists.
+- The `dotenv` import in `vitest.config.ts` is evaluated at config-load time (before tests run), which is the correct behavior — but it relies on `dotenv` being installed. It is (checked `package.json`), but if removed, the config will silently fail to inject env vars.
+- The Vite CJS deprecation warning (`The CJS build of Vite's Node API is deprecated`) appears in test output. This is a cosmetic Vitest/Vite version mismatch and does not affect test correctness. Can be suppressed by migrating `vitest.config.ts` to ESM if desired.
+
+---
+
 ## Progress Update as of 2026-05-02 03:49 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
