@@ -4,6 +4,24 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 03:40 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Configured Drizzle Kit with PostgreSQL dialect pointing to Neon database. Created `drizzle.config.ts` and installed `dotenv` dev dependency to support the drizzle CLI reading `.env.local` at runtime.
+
+### Detail of changes made:
+
+- Created `drizzle.config.ts` at repo root with schema path `./src/db/schema.ts`, output dir `./drizzle`, PostgreSQL dialect, and `DATABASE_URL` from environment
+- Installed `dotenv@11.0.0` as dev dependency (2 packages added; no vulnerabilities introduced)
+- Config is ready for Step B3 (schema definition) — schema file does not yet exist but config correctly points to where it will be created
+
+### Potential concerns to address:
+
+- None at this stage. Config is correct and minimal; will be fully validated once `src/db/schema.ts` is created and migrations are generated in B3-B4.
+
+---
+
 ## Progress Update as of 2026-05-02 02:46 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
