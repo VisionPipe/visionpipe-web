@@ -4,6 +4,23 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 03:56 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Code review polish on `getBalance`: switched expiration filter from JS-side `new Date()` to SQL-side `NOW()` (eliminates theoretical clock-skew risk between app and DB), and added a JSDoc explaining the "balance of 0 ≠ org found" ambiguity. Updated the plan file to match. All 8 tests still pass.
+
+### Detail of changes made:
+
+- `src/db/queries.ts`: replaced `gt(purchases.expiresAt, new Date())` with `sql\`${purchases.expiresAt} > NOW()\``. Removed the now-unused `gt` import (consolidated drizzle-orm imports onto one line). Added a JSDoc above `getBalance` clarifying that a returned `0` could mean either "no qualifying purchases" or "org not found" — callers that need to distinguish must verify org existence separately.
+- `docs/superpowers/plans/2026-05-02-stripe-credit-billing-phase-1.md`: mirrored the same edits in the Task B5 spec block (lines ~598–622) so future plan readers see the corrected version.
+
+### Potential concerns to address:
+
+- None new. The integration-test-DB-isolation concern from the previous entry still applies for CI.
+
+---
+
 ## Progress Update as of 2026-05-02 03:52 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update

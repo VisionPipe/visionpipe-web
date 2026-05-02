@@ -1,7 +1,13 @@
-import { sql, and, eq, gt, inArray } from 'drizzle-orm';
+import { sql, and, eq, inArray } from 'drizzle-orm';
 import { db } from './client';
 import { purchases } from './schema';
 
+/**
+ * Sum of unexpired, non-refunded credits for the org. Returns 0 when the
+ * org has no qualifying purchases (which also means "org not found" is
+ * indistinguishable from "org has zero balance" — callers that need to
+ * verify org existence must do so separately).
+ */
 export async function getBalance(orgId: number): Promise<number> {
   const result = await db
     .select({
@@ -12,7 +18,7 @@ export async function getBalance(orgId: number): Promise<number> {
       and(
         eq(purchases.orgId, orgId),
         inArray(purchases.status, ['complete', 'partially_refunded']),
-        gt(purchases.expiresAt, new Date())
+        sql`${purchases.expiresAt} > NOW()`
       )
     );
   return result[0]?.total ?? 0;
