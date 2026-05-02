@@ -4,6 +4,44 @@ This document tracks progress on the `main` branch of the VisionPipe website. It
 
 ---
 
+## Progress Update as of 2026-05-02 02:22 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Brainstormed and wrote the full design spec for **Phase 1 of Stripe credit billing** on the website. The spec is committed at `docs/superpowers/specs/2026-05-02-stripe-credit-billing-design.md` and is the authoritative input for the implementation plan that will follow. Phase 1 = web-side full vertical (account system, database, Stripe Checkout, magic-link auth, buyer dashboard) — the desktop app stays on its local credit counter and gets wired to the backend in Phase 2. No code yet; this commit is design only.
+
+### Detail of changes made:
+
+- **Decisions reached during brainstorm** (full reasoning in spec):
+  - **Phasing:** Phase 1 = web-side only. Phase 1.5 = team purchasing additive (no schema migration). Phase 2 = desktop integration.
+  - **Pricing model:** 4 one-time credit packs. $10/1,000 (base), $20/2,200 (10% bonus), $50/5,750 (15% bonus), $100/12,000 (20% bonus). 12-month expiry from purchase.
+  - **Auth:** Hybrid (Stripe-first for new buyers with magic-link email post-payment; logged-in users skip the magic-link round-trip).
+  - **Identity model:** Org-first from day 1 — every signup auto-creates a single-user Clerk Organization. Phase 1.5 adds invitations/multi-member orgs without schema migration.
+  - **Tech stack:** Clerk (auth + organizations) + Neon Postgres + Stripe + Resend, all inside the existing Next.js 15 app at `visionpipe-web` (no separate repo).
+  - **Stripe shape:** 4 Products created in Stripe Dashboard, Price IDs in env vars; `allowed_countries: ['US']` for Phase 1 (no VAT registrations needed); Stripe Tax on; Customer Portal enabled for invoice/receipt access.
+  - **Refunds:** 30-day, manual via Stripe Dashboard; `charge.refunded` webhook updates balance automatically.
+- **Data model:** 4 tables — `organizations`, `memberships`, `purchases`, `webhook_events`. Bucket-per-purchase (each purchase has its own `expires_at`); balance computed live from `SUM(credits_purchased - refunded_credits) WHERE expires_at > NOW()`. No `balance` column, no ledger, no cron for expiry.
+- **API surface:** 6 routes (`/api/checkout`, `/api/stripe/webhook`, `/api/checkout/status`, `/api/me/balance`, `/api/me/purchases`, `/api/me/billing-portal`).
+- **Page additions/changes:** `/pricing` modified (keeps two-card framing, adds 4 pack cards in a section below); 5 new pages (`/sign-in`, `/sign-up`, `/dashboard`, `/dashboard/purchases`, `/checkout/success`, `/checkout/cancel`); header gets `<UserButton />` for logged-in users.
+- **Webhook events subscribed:** `checkout.session.completed`, `charge.refunded`, `charge.dispute.created`, `payment_intent.payment_failed`. Idempotency via `webhook_events` table + `UNIQUE` constraint on `stripe_payment_intent_id`.
+- **Spec self-review:** Ran inline checks — no placeholders/TBDs/contradictions, 443 lines, scoped for a single implementation plan. Open items deferred to "during implementation" (specific pack-card copy, polling interval, etc.) are listed explicitly at the end of the spec.
+- **Clerk dev instance configured** by founder during the brainstorm. Publishable key shared in chat; secret key correctly held back. Frontend API URL: `https://integral-walrus-29.clerk.accounts.dev`. JWKS URL captured for Phase 2 desktop JWT verification.
+- **Files created this commit:**
+  - `docs/superpowers/specs/2026-05-02-stripe-credit-billing-design.md` — the spec
+- **Files modified this commit:**
+  - `prd/main.md` — this entry
+
+### Potential concerns to address:
+
+- **Spec awaiting founder review.** Per the brainstorming workflow, the founder should re-read the committed spec before implementation begins. The next step (after this commit) is the `superpowers:writing-plans` skill to produce a concrete implementation plan, but that should not start until the spec is sign-off-final.
+- **Live PostToolUse hook test.** This commit is the first since the founder was advised to run `/hooks` to reload `.claude/settings.json`. If the hook fires, I should see a system-reminder injected after the `git commit` Bash call. If not, the founder will still need to run `/hooks` (or restart the session).
+- **Tax registrations not in scope.** Phase 1 launches US-only. International expansion (EU VAT via OSS, Canada GST, etc.) is non-trivial — needs a tax accountant or a service like Quaderno. Worth a separate decision before any international marketing push.
+- **Domain `visionpipe.ai`** assumed available and pointable at Vercel. If it isn't actually registered or there's a different production domain in mind, the launch checklist (Appendix B of the spec) needs adjustment.
+- **No code yet.** The spec is comprehensive but everything from `npm install` to the database schema is still ahead. The implementation plan will sequence this; rough estimate is 1–2 weeks of focused work for a competent dev to get to the launch checklist.
+- **Open questions deferred but worth surfacing** before implementation begins: whether to include a "Most popular" badge on a specific pack card; whether to send a Resend purchase-confirmation in addition to Stripe's auto-receipt (current default: no); polling interval on `/checkout/success` (current default: 1s).
+
+---
+
 ## Progress Update as of 2026-05-02 12:47 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
