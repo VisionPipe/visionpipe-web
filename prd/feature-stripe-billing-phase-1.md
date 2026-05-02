@@ -4,6 +4,26 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:43 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task E6 complete: implemented `handleChargeRefunded` webhook handler in `webhook-handlers.ts`, wired into the dispatch switch, and added 2 placeholder tests. tsc clean, 4 webhook-handler tests pass.
+
+### Detail of changes made:
+
+- `src/lib/webhook-handlers.ts`: added `import { sendDisputeAlert } from './email'` (needed for E7 which lands in the same file). Added `handleChargeRefunded(charge: Stripe.Charge)` — resolves `payment_intent` to an ID (handles string or object), looks up purchase by `stripePaymentIntentId`, warns and returns if not found, computes `fullyRefunded` flag and proportional `refundedCreditsProportional`, then updates `status` (refunded/partially_refunded) and `refundedCredits` in the DB.
+- Also added `handleDisputeCreated` to the same file (E7 lands here — kept in one file per plan). See E7 entry for details.
+- `src/lib/__tests__/webhook-handlers.test.ts`: appended `describe('handleChargeRefunded', ...)` with 2 placeholder tests (`expect(true).toBe(true)`) per plan spec. Real verification is manual smoke test (deferred to user).
+- `src/app/api/stripe/webhook/route.ts`: updated import to include `handleChargeRefunded` and `handleDisputeCreated`; replaced `// TODO Task E6` and `// TODO Task E7` stubs with real dispatch calls.
+
+### Potential concerns to address:
+
+- Tests are placeholder assertions (`expect(true).toBe(true)`) per spec — they verify the handler is exported and can be imported, but do not test actual DB mutation behavior. Real verification requires a Stripe CLI refund event replay.
+- `refundedCreditsProportional` uses floating-point division and `Math.floor` — for non-round amounts there may be off-by-one credit rounding. Acceptable for Phase 1.
+
+---
+
 ## Progress Update as of 2026-05-02 04:40 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update

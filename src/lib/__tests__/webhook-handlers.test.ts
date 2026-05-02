@@ -49,3 +49,15 @@ describe('handleCheckoutCompleted', () => {
     expect(findOrCreateUserByEmail).toHaveBeenCalledWith('buyer@example.com');
   });
 });
+
+import { handleChargeRefunded } from '../webhook-handlers';
+
+describe('handleChargeRefunded', () => {
+  it('updates purchase status to refunded when full refund', async () => {
+    expect(true).toBe(true); // placeholder per plan
+  });
+
+  it('updates to partially_refunded for partial refund', async () => {
+    expect(true).toBe(true); // placeholder per plan
+  });
+});

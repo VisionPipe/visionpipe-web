@@ -3,7 +3,7 @@ import Stripe from 'stripe';
 import { stripe } from '@/lib/stripe';
 import { db } from '@/db/client';
 import { webhookEvents } from '@/db/schema';
-import { handleCheckoutCompleted } from '@/lib/webhook-handlers';
+import { handleCheckoutCompleted, handleChargeRefunded, handleDisputeCreated } from '@/lib/webhook-handlers';
 
 export const dynamic = 'force-dynamic';
 export const runtime = 'nodejs';
@@ -38,10 +38,10 @@ export async function POST(req: Request) {
       await handleCheckoutCompleted(event.data.object as Stripe.Checkout.Session);
       break;
     case 'charge.refunded':
-      // TODO Task E6
+      await handleChargeRefunded(event.data.object as Stripe.Charge);
       break;
     case 'charge.dispute.created':
-      // TODO Task E7
+      await handleDisputeCreated(event.data.object as Stripe.Dispute);
       break;
     case 'payment_intent.payment_failed':
       console.log('payment_intent.payment_failed', event.data.object.id);
