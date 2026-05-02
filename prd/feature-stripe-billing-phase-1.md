@@ -4,6 +4,23 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:53 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task F1 complete: created `GET /api/me/balance` — looks up the user's org via memberships and returns their credit balance. Smoke test returned Clerk-middleware-intercepted 404, which is the expected behavior for unauthenticated curl requests in Clerk dev mode (see notes).
+
+### Detail of changes made:
+
+- `src/app/api/me/balance/route.ts`: new file. `nodejs` runtime. Authenticates via `auth()`, looks up membership by `clerkUserId`, returns `{ balance: 0 }` if no membership found, otherwise calls `getBalance(orgId)` and returns `{ balance: N }`. Does not import `organizations` (unused per spec note).
+- Smoke test: `curl http://localhost:3100/api/me/balance` returns HTTP 404 with headers `x-clerk-auth-reason: protect-rewrite, dev-browser-missing` and `x-middleware-rewrite: /clerk_...`. This is correct — Clerk middleware intercepts unauthenticated API requests in dev mode and rewrites to its own internal handler, which 404s because the rewrite target isn't a real page. In a real browser with Clerk's dev cookie (or in production), an unauthenticated request would reach the route and return 401. The spec explicitly accepts "404/308 (Clerk middleware redirect)" as a valid smoke result.
+
+### Potential concerns to address:
+
+- Clerk dev-mode behavior makes it impossible to smoke-test API routes with raw curl without a valid dev-browser cookie. All `/api/me/*` routes will exhibit this behavior. Real testing requires a signed-in browser session.
+
+---
+
 ## Progress Update as of 2026-05-02 04:47 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
