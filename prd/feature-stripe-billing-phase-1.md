@@ -4,6 +4,28 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:35 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task E4 complete: created `CreditPackCard` and `CreditPacksSection` components and integrated them into the `/pricing` page. The Commercial card's "Contact Us" CTA is now replaced with a "View Credit Packs ↓" anchor link, and the new `<CreditPacksSection />` is inserted between the two pricing cards and the FAQ.
+
+### Detail of changes made:
+
+- `src/components/CreditPackCard.tsx`: new client component. Renders a single credit pack card with price, per-credit rate, optional bonus percentage label, and a buy button. On click, POSTs to `/api/checkout` with the pack SKU, then redirects to the Stripe Checkout URL. Shows an inline error string on failure. Uses `bg-deep-forest`, `text-teal`, `text-amber`, `text-burnt-sienna` tokens as specced.
+- `src/components/CreditPacksSection.tsx`: new server component. Imports `PACKS` from `@/lib/pricing`, maps over all 4 packs, renders a `CreditPackCard` for each with bonus percentages (pack_10=0%, pack_20=10%, pack_50=15%, pack_100=20%) defined in a local `BONUSES` record. Includes the 12-month expiry / 30-day refund policy note.
+- `src/app/pricing/page.tsx`: three edits — (1) added `import { CreditPacksSection }` at top; (2) replaced the Commercial card's `href="mailto:hello@visionpipe.ai"` / "Contact Us" CTA with `href="#credit-packs"` / "View Credit Packs ↓" (same classes, one CTA total — verified); (3) inserted `<CreditPacksSection />` between the `</section>` closing the two-card pricing row and the `{/* FAQ */}` comment.
+- Smoke test: `curl http://localhost:3099/pricing` grep confirmed "Credit Packs" (×2), "credit-packs" (×4), "View Credit Packs ↓" (×2) all present in rendered HTML.
+- 16 tests passing (no regression), `npx tsc --noEmit` clean.
+
+### Potential concerns to address:
+
+- `CreditPacksSection` is a server component that imports `PACKS` (which reads `process.env.STRIPE_PRICE_PACK_*` at module-load time). In production builds, if those env vars are absent, `priceId` will be `undefined` — the cards will still render visually but checkout will fail. Vercel env vars must be set before deploying.
+- The buy button redirects via `window.location.href` — no loading spinner beyond the button text "Redirecting...". If Stripe Checkout is slow to initialize, the user sees a frozen button for a moment. Acceptable for Phase 1.
+- The Commercial card now has exactly one CTA ("View Credit Packs ↓") — verified in the rendered HTML. No duplicate CTA risk.
+
+---
+
 ## Progress Update as of 2026-05-02 04:32 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update

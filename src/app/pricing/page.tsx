@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { CreditPacksSection } from "@/components/CreditPacksSection";
 
 export const metadata: Metadata = {
   title: "Pricing — Vision|Pipe",
@@ -188,14 +189,16 @@ export default function PricingPage() {
             </ul>
 
             <a
-              href="mailto:hello@visionpipe.ai"
+              href="#credit-packs"
               className="mt-8 block rounded-lg border border-amber/30 px-6 py-3 text-center text-sm font-semibold text-cream transition hover:border-amber/60 hover:bg-amber/10"
             >
-              Contact Us
+              View Credit Packs ↓
             </a>
           </div>
         </div>
       </section>
+
+      <CreditPacksSection />
 
       {/* FAQ */}
       <section className="border-t border-white/5 bg-deep-forest px-6 py-24">
