@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { BalanceDisplay } from '@/components/BalanceDisplay';
 import { PurchaseHistory } from '@/components/PurchaseHistory';
+import { BillingPortalButton } from '@/components/BillingPortalButton';
 
 export default function DashboardPage() {
   return (
@@ -31,6 +32,9 @@ export default function DashboardPage() {
           <div className="mt-4 overflow-x-auto">
             <PurchaseHistory limit={5} />
           </div>
+        </div>
+        <div className="mt-12">
+          <BillingPortalButton />
         </div>
       </div>
     </div>

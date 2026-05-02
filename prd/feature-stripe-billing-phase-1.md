@@ -4,6 +4,28 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 04:56 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Task G2 complete: added Customer Portal access from the dashboard. Four changes: new `POST /api/me/billing-portal` API route, `stripeCustomerId` save in `handleCheckoutCompleted`, new `BillingPortalButton` client component, and updated dashboard page to include it. All 20 tests pass, tsc clean.
+
+### Detail of changes made:
+
+- `src/app/api/me/billing-portal/route.ts`: new file. `nodejs` runtime. POST handler — authenticates via `auth()`, looks up membership → org → checks `stripeCustomerId` (404 if missing), calls `stripe.billingPortal.sessions.create` with the customer ID and `return_url` pointing to `/dashboard`, returns `{ url }`.
+- `src/lib/webhook-handlers.ts`: in `handleCheckoutCompleted`, after the org upsert block and before the purchase insert — extracts `customerId` from `session.customer` (handles string or object form), then if non-null and org doesn't already have one, updates `organizations.stripeCustomerId` in DB and keeps the local `org` var consistent via spread. The `org` variable is `let`-destructured so reassignment works fine — no TypeScript issue.
+- `src/components/BillingPortalButton.tsx`: `'use client'` component. On click: POSTs to `/api/me/billing-portal`, reads `data.url`, navigates via `window.location.href`. Styled with `border-white/20`, `text-cream`, `hover:bg-deep-forest`.
+- `src/app/dashboard/page.tsx`: added `BillingPortalButton` import and a `mt-12` div at the bottom of the inner container rendering `<BillingPortalButton />`.
+- Full test suite: 20/20 passing (no regressions).
+
+### Potential concerns to address:
+
+- **G1 still pending (user action required):** The Stripe Customer Portal must be configured in the Stripe dashboard (both test and live modes) before `stripe.billingPortal.sessions.create` will succeed. Until that's done, the API will return a Stripe error about portal configuration missing. This is a user/external step — not a code issue.
+- `BillingPortalButton` has no loading state — the button stays clickable while the POST is in flight. A second click would fire a second request. Low risk (portal sessions are cheap) but could add a disabled state in Phase 2.
+- `window.location.href` navigation means the dashboard's React state is discarded. Acceptable since the portal is an external Stripe page anyway.
+
+---
+
 ## Progress Update as of 2026-05-02 04:55 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update

@@ -35,6 +35,14 @@ export async function handleCheckoutCompleted(session: Stripe.Checkout.Session):
     });
   }
 
+  const customerId = typeof session.customer === 'string' ? session.customer : session.customer?.id;
+  if (customerId && !org.stripeCustomerId) {
+    await db.update(organizations)
+      .set({ stripeCustomerId: customerId })
+      .where(eq(organizations.id, org.id));
+    org = { ...org, stripeCustomerId: customerId }; // keep local var consistent
+  }
+
   const expiresAt = new Date();
   expiresAt.setMonth(expiresAt.getMonth() + 12);
 
