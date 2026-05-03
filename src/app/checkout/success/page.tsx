@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useAuth } from '@clerk/nextjs';
 
-export default function CheckoutSuccessPage() {
+function CheckoutSuccessInner() {
   const params = useSearchParams();
   const router = useRouter();
   const { isSignedIn } = useAuth();
@@ -56,5 +56,21 @@ export default function CheckoutSuccessPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function CheckoutSuccessPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-forest p-8">
+          <div className="max-w-md text-center">
+            <h1 className="text-3xl font-bold text-cream">Processing your payment...</h1>
+          </div>
+        </div>
+      }
+    >
+      <CheckoutSuccessInner />
+    </Suspense>
   );
 }

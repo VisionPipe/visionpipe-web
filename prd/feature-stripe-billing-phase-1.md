@@ -4,6 +4,24 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 05:02 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Production build (`npm run build`) was failing on `/checkout/success` because Next.js 15's static prerender requires `useSearchParams()` to be wrapped in a `<Suspense>` boundary. Wrapped the page's existing logic in a Suspense boundary with a "Processing your payment..." fallback — build now succeeds, all 14 routes generate cleanly. This was caught only by `npm run build`, not by `npm test` or `tsc --noEmit`. Worth running `npm run build` before any future PR to main.
+
+### Detail of changes made:
+
+- `src/app/checkout/success/page.tsx`: refactored. The page now exports a top-level `CheckoutSuccessPage` that wraps a `<Suspense fallback={...}>` around the renamed inner `CheckoutSuccessInner` (which holds the `useSearchParams`, polling logic, and JSX). Fallback shows a minimal "Processing your payment..." card so the static prerender has something to emit.
+- Verified `npm run build` succeeds: ✓ Compiled in 1.5s, ✓ 14/14 static pages generated.
+
+### Potential concerns to address:
+
+- Next.js workspace-root warning: build detected an extra lockfile at `/Users/drodio/package-lock.json` (founder's home dir) and fell back to that as the inferred root. Likely benign on Vercel (clean checkout), but if it becomes a deployment issue, set `outputFileTracingRoot: __dirname` in `next.config.js`. Not fixing now since it's a local-environment artifact.
+- Build output shows `/api/me/*` and `/api/stripe/webhook` correctly marked dynamic (`ƒ`), and `/dashboard*` + `/checkout/*` as static (`○`). The dashboard pages don't crash at prerender despite using `fetch('/api/me/...')` — because the fetch only runs in `useEffect` (client-side), not at build time.
+
+---
+
 ## Progress Update as of 2026-05-02 04:58 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
