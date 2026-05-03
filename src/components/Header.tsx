@@ -77,7 +77,7 @@ export default function Header() {
             <UserButton afterSignOutUrl="/" />
           </SignedIn>
           <a
-            href="/#hero"
+            href="/download"
             className="rounded-lg bg-teal px-4 py-2 text-sm font-medium text-cream transition hover:bg-teal-light"
           >
             Download
@@ -149,7 +149,7 @@ export default function Header() {
               <UserButton afterSignOutUrl="/" />
             </SignedIn>
             <a
-              href="/#hero"
+              href="/download"
               className="inline-block rounded-lg bg-teal px-4 py-2 text-center text-sm font-medium text-cream transition hover:bg-teal-light"
               onClick={() => setMenuOpen(false)}
             >
