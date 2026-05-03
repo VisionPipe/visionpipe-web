@@ -4,6 +4,52 @@ This document tracks progress on the `main` branch of the VisionPipe website. It
 
 ---
 
+## Progress Update as of 2026-05-02 08:02 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+**Production cutover complete.** `feature/stripe-billing-phase-1` was fast-forwarded into main earlier this evening (43 commits → main at `b595234`), then a flurry of infrastructure-only changes (no code) brought the site live on `visionpipe.ai` with **live-mode Stripe taking real money**. End-to-end smoke test landed: a real $10 purchase from `drodio@gmail.com` flowed through Stripe Checkout → live webhook → DB row → Clerk user creation → org/membership row, all clean. This commit captures what changed in the runtime environment, why, and what to watch for next session — none of which is in Git so the only record is here.
+
+The cutover took longer than expected because of two non-obvious gotchas, both now fixed and worth flagging for the next person.
+
+### Detail of changes made:
+
+**Vercel project + env vars.** Linked this repo to `drodio1s-projects/visionpipe-web`, populated env vars in three scopes:
+- **Development** (local + `vercel env pull`): test-mode Stripe, dev Clerk keys, current Neon DB, current Resend key, `NEXT_PUBLIC_APP_URL=https://visionpipe.ai`.
+- **Preview** (branch-scoped to `feature/stripe-billing-phase-1`): same as Development. Note: in non-interactive mode the CLI requires explicit branch scoping for Preview env vars — "all preview branches" syntax is finicky. Other branches won't pick these up. Worth scripting for future preview branches.
+- **Production**: live-mode Stripe (live `pk_live_…`/`sk_live_…`, 4 live `STRIPE_PRICE_PACK_*` IDs, real `STRIPE_WEBHOOK_SECRET`), **production-instance** Clerk keys (different from dev), current Neon DB, current Resend key, `NEXT_PUBLIC_APP_URL=https://visionpipe.ai`.
+
+**Domain.** `visionpipe.ai` (apex + `www`) was already attached to the project. DNS is at Cloudflare (`erin.ns.cloudflare.com`, `patrick.ns.cloudflare.com`) with A/CNAME records pointing at Vercel. **Currently the apex 307-redirects to www** — that's the Vercel default and it's the inverse of what we'd recommended (apex-canonical, www → apex) earlier. We did NOT flip it during the cutover; it's a polish item.
+
+**Clerk: dev → production instance.** The original plan was to *reuse* the Clerk dev instance (`integral-walrus-29.clerk.accounts.dev`) for the cutover to avoid migrating the one user record (`user_3DBxA28WnNiOmaFars4ciH8gDEm` for `drodio@gmail.com`) that was tied to dev. That plan **broke immediately on first live transaction**: Clerk dev instances refuse to recognize sign-ins for emails that haven't been pre-provisioned through dev mode, regardless of webhook-driven user creation. So we switched mid-cutover to a fresh Clerk **Production** instance for `visionpipe.ai`. New keys in Vercel Production scope (`pk_live_Y2xlcmsudmlzaW9ucGlwZS5haSQ` decoded = `clerk.visionpipe.ai`, plus matching `sk_live_…`). Five Clerk-required CNAMEs added to Cloudflare via API, all DNS-only (NOT proxied — that's critical, the orange cloud breaks Clerk verification):
+- `accounts.visionpipe.ai` → `accounts.clerk.services`
+- `clerk.visionpipe.ai` → `frontend-api.clerk.services`
+- `clk._domainkey.visionpipe.ai` → `dkim1.0ejg2nnp5ewz.clerk.services`
+- `clk2._domainkey.visionpipe.ai` → `dkim2.0ejg2nnp5ewz.clerk.services`
+- `clkmail.visionpipe.ai` → `mail.0ejg2nnp5ewz.clerk.services`
+
+The DB still has dead rows from the dev-Clerk era (`organizations` rows 164/165 with `clerk_user_id=user_3DBxA28…` from the dev instance — those user IDs don't resolve in the prod instance and the rows are now orphaned). Not removed; harmless. The first live purchase created clean rows: org `id=178`, membership `id=20`, purchase `id=146`, Clerk user `user_3DCDDvVgpnUqtHnGPYNomxMPqK8`.
+
+**Stripe live webhook + the 307 bug.** Created live webhook `we_1TSpgEKBCAnWXTBGdeKR7ye0` subscribed to 4 events (`checkout.session.completed`, `charge.refunded`, `charge.dispute.created`, `payment_intent.payment_failed`). Two old vestigial webhooks pointing at `https://api.visionpipe.ai/stripe/webhook` (a non-existent subdomain) were deleted to prevent duplicate-fire warning emails. The webhook signing secret was captured and put into Vercel Production (`STRIPE_WEBHOOK_SECRET=whsec_…`).
+
+**The 307 bug:** First two live test purchases (one of which was refunded) sat indefinitely on `Processing your payment…` because **Stripe webhook delivery does not follow redirects**. The webhook was registered against `https://visionpipe.ai/api/stripe/webhook` (apex), but apex 307s → www, and Stripe treats the 307 as a non-2xx and queues the event for retry forever. **Fix:** updated the webhook endpoint URL to `https://www.visionpipe.ai/api/stripe/webhook` via Stripe API. Manually resent the queued events; the third real $10 purchase from `drodio@gmail.com` then completed end-to-end.
+
+**Stripe Tax / Customer Portal (live mode).** Confirmed configured. Tax: `status=active`, head office set (San Francisco CA), 0 active registrations — meaning $0 tax is calculated for any buyer. That's correct legal posture until economic nexus is crossed in any state. Customer Portal: `bpc_1TSpbeKBCAnWXTBGukjzhjQq` with `customer_update`, `invoice_history`, `payment_method_update` enabled and `is_default=true` (no code change needed; our code uses default config).
+
+**Other infra**: cleaned up the `.env.local` mess from earlier in the day (Vercel CLI's `vercel link` overwrote a hand-populated file, forcing us to re-collect all secrets from each provider's dashboard — see `~/.claude/projects/-Users-drodio-Projects-visionpipe-web/memory/feedback_vercel_env_local_clobber.md` for the postmortem). Added `.backup-*` to `.gitignore` so the recovery backups can't accidentally be committed.
+
+### Potential concerns to address:
+
+- **Apex/www redirect direction is reversed from convention.** Currently `visionpipe.ai → www.visionpipe.ai`. This is what bit us with the Stripe webhook (apex POSTs got 307'd). Stripe is now correctly pointed at `www`, but ANY future external integration registered against the apex URL will hit the same 307 problem. Recommend flipping in Vercel project Domains → set `visionpipe.ai` as primary so www → apex (the convention used by stripe.com / vercel.com / linear.app). Not blocking; would need a webhook URL update again.
+- **Cloudflare API token from this session is in chat history.** Scoped to `Zone:DNS:Edit` for `visionpipe.ai` only, so blast radius is limited, but should be rotated/deleted at My Profile → API Tokens → Cloudflare.
+- **Resend domain `visionpipe.ai` verification status unconfirmed.** User said DNS is set up, but our send-only restricted Resend API key can't query domain status. If Stripe receipts / Clerk magic links don't deliver in production, check the Resend dashboard. Not blocking the purchase flow itself (Stripe sends its own receipts directly).
+- **One queued live event still pending delivery** (`evt_1TSpoKKBCAnWXTBGwosFcPTr` for `drodio@storytell.ai`, the refunded purchase). It'll either auto-retry to the new www URL (and create an orphan org/membership/purchase row for that email), or Stripe will give up and disable retries after ~3 days. Either is fine since the user refunded; just be aware a stray row may appear in the DB if it eventually lands.
+- **Vestigial dev-Clerk DB rows** (organizations 164/165 with `clerk_user_id=user_3DBxA28…` from the dev instance). Won't resolve to a real prod-Clerk user, can be ignored or `DELETE FROM` cleaned up later. Not in any path that breaks live flow.
+- **`/dashboard` returns 404 to anonymous visitors** because `src/middleware.ts` calls `auth.protect()` which is Clerk's "404-on-unauth" default. UX could be improved with `auth.protect({ unauthenticatedUrl: '/sign-in' })`. Polish item.
+- **Vercel Preview env vars are scoped to one branch** (`feature/stripe-billing-phase-1`). When other branches are worked on, those env vars won't apply unless re-added. Worth a one-off script before doing a branch-heavy iteration.
+
+---
+
 ## Progress Update as of 2026-05-02 02:36 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
