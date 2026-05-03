@@ -4,6 +4,33 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 07:14 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Wired the Vercel deploy: project linked to `drodio1s-projects/visionpipe-web`, all active env vars (Clerk dev keys, Neon DB URL, Stripe **test** keys + 4 test price IDs + placeholder webhook secret, Resend key, NEXT_PUBLIC_APP_URL) pushed to **Preview** (branch-scoped to `feature/stripe-billing-phase-1`) and **Development** scopes. First green preview at https://visionpipe-nrz9ok0uy-drodio1s-projects.vercel.app (build ✓, all 14 static pages generated). Deployment Protection toggled off by founder so the URL is publicly reachable. Domain `visionpipe.ai` (apex + www) confirmed bound to this Vercel project; DNS resolves to Vercel anycast IPs via Cloudflare nameservers. The currently-served content on `www.visionpipe.ai` is a stale pre-v0.2.0 deployment — there has been no Production deploy yet, so Vercel is fronting the latest "Ready" build, which predates the `/downloads/VisionPipe.dmg` and Stripe billing work. The merge-to-main below will trigger the first true Production deploy.
+
+In parallel, also fixed two ergonomic things on `src/app/page.tsx` that were dangling from earlier in the day: both "Download for Mac" buttons now point at `/downloads/VisionPipe.dmg` (the stable mirror of `VisionPipe-0.2.0.dmg` in `public/downloads/`) and were resized to 50% larger than the original (`text-3xl`, `h-8 w-8` icon, `gap-2`, `underline-offset-4`) and reordered above the brew CopyBlock per founder's iteration on layout.
+
+This commit prepares the merge to `main` for the **hard-cutover** path the founder chose: reuse Clerk dev instance + reuse current Neon DB (avoids data migration / orphaning the existing membership row), but flip Stripe to **live** mode so real money flows. Production-scope env vars and the live webhook get set immediately after this commit.
+
+### Detail of changes made:
+
+- `src/app/page.tsx`: both Download-for-Mac CTAs (hero + bottom) replaced GitHub release URL → `/downloads/VisionPipe.dmg` with `download` attribute. Layout: link moved above the brew CopyBlock. Sizes: settled at `text-3xl` (~30px) + `h-8 w-8` icon, after a brief detour through `text-6xl` (3x) which was too large.
+- `.gitignore`: added `.backup-*` so local `.env.local` backups don't leak. (Founder created `.backup-050226-env.local` after the Vercel CLI clobbered `.env.local` earlier — see "potential concerns".)
+- Stored Stripe live values in `.env.local` under `_LIVE`-suffixed names (so they're available for the production cutover but won't be picked up by local dev or accidentally promoted): `STRIPE_PUBLISHABLE_KEY_LIVE`, `STRIPE_SECRET_KEY_LIVE`, `STRIPE_PRICE_PACK_{10,20,50,100}_LIVE`. The 4 live price IDs were discovered via `stripe prices list` against the live secret — they already existed from earlier product creation: `price_1TMRcwKBCAnWXTBGaR2ijfTQ` ($10), `price_1TMRehKBCAnWXTBG0kKkODcH` ($20), `price_1TMRg3KBCAnWXTBGfjauck44` ($50), `price_1TSlpvKBCAnWXTBG3f6slats` ($100). Verified the live Stripe account ID `acct_1GrUHCKBCAnWXTBG` matches the test account, so it's the same Stripe entity in both modes.
+
+### Potential concerns to address:
+
+- **`vercel link` clobbered `.env.local`** earlier today — Vercel CLI treats `.env.local` as a cache of vars stored in Vercel, not a source-of-truth file, and overwrote the founder's hand-populated secrets with just a `VERCEL_OIDC_TOKEN` line. We re-collected the test keys from each provider's dashboard and the Stripe CLI. Saved a memory in `~/.claude/projects/-Users-drodio-Projects-visionpipe-web/memory/feedback_vercel_env_local_clobber.md` so the next session backs up `.env.local` before linking. Going forward the canonical flow is: secrets live in Vercel → `vercel env pull` populates `.env.local` for local dev (NOT hand-edited).
+- **Production scope on Vercel is still empty.** When `main` is updated, Vercel will auto-trigger a Production deploy and crash the same way the early Preview deploys did until the live env vars are populated. Next commit/step pushes them.
+- **Vercel deploy.preview env vars are scoped to one branch** (`feature/stripe-billing-phase-1`). In non-interactive mode the CLI required an explicit branch, and "all preview branches" was finicky. If/when other branches get worked on, those env vars need to be re-added (or broadened) — easy to forget. Worth scripting later.
+- **Stripe Tax + Customer Portal need to be configured in Live mode** before real checkouts can succeed (`automatic_tax: enabled` is already set in `src/app/api/checkout/route.ts`; `/api/me/billing-portal` opens the portal). Configurable only via Stripe Dashboard, can't do via CLI. Founder's task for the hard-cutover.
+- **Nameservers are Cloudflare** (not Vercel) — that's fine for now (DNS resolves correctly to Vercel IPs), but if we ever need Vercel-managed DNS for advanced features (e.g. wildcard subdomain edge logic) we'd have to migrate.
+- **`www.visionpipe.ai` apex/www redirect direction**: Vercel currently 307-redirects `visionpipe.ai` → `www.visionpipe.ai`. Earlier conversation recommended apex-canonical (matching stripe.com/vercel.com). Easy to flip in Vercel project settings → Domains → set primary, but not blocking the cutover.
+
+---
+
 ## Progress Update as of 2026-05-02 06:00 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
