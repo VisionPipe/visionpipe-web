@@ -4,6 +4,28 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 05:15 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Founder ran the first real end-to-end test purchase. Stripe `checkout.session.completed` did reach the handler, but `handleCheckoutCompleted` threw a `ClerkAPIResponseError: Unprocessable Entity (422)` from `findOrCreateUserByEmail` — Clerk's Backend API rejects creating a user with only an email when the instance config requires a password, even though the dashboard sign-up flow is magic-link. The dispatch error also surfaced a SECOND latent bug: the route inserted the idempotency row BEFORE dispatching, so when the handler crashed and Stripe retried, the route returned `{deduped: true}` and never re-ran the handler. Both fixed in this commit.
+
+### Detail of changes made:
+
+- `src/lib/clerk-backend.ts`: `findOrCreateUserByEmail` now passes `skipPasswordRequirement: true` and `skipPasswordChecks: true` to `client.users.createUser`. These flags tell Clerk "this user is being provisioned via webhook, password rules don't apply." Added an inline comment explaining why.
+- `src/app/api/stripe/webhook/route.ts`: wrapped the dispatch switch in `try/catch`. On error, the catch deletes the just-inserted `webhookEvents` row (rolling back the idempotency claim) so Stripe's retry can re-attempt, then logs the error with the full Clerk error metadata (`clerkError`, `status`, `errors[]`) before rethrowing for a 5xx. Also imported `eq` from `drizzle-orm` for the rollback delete.
+- Cleaned up the failed `webhook_events` row for the founder's failed event `evt_1TSnbpKBCAnWXTBG2ikTKKgE` directly via SQL (without this manual delete, the next retry would have hit the dedupe path and silently skipped).
+- Founder enabled "Organizations" in Clerk dashboard alongside the fixes (was previously OFF, which would have caused a SECOND failure at `findOrCreateOrgForUser` even after the createUser fix).
+- Verified: 20/20 vitest tests still pass, `npm run build` succeeds.
+
+### Potential concerns to address:
+
+- The `as any` cast on the webhook payload (`payload: event as any`) and on the error-cast (`as { clerkError?: boolean; ... }`) are tolerable in this defensive boundary code but worth revisiting if we hit more type friction later.
+- Vitest mocks `clerk-backend` entirely, so this 422 was not catchable in tests — only revealed by a real purchase. If we add more Clerk Backend calls (e.g. updating user metadata after first purchase), expect similar surprises. Manual smoke testing remains essential before production.
+- The polling page on `/checkout/success` still has no timeout ceiling. Founder's stuck-page screenshot confirmed the impact: when the webhook handler throws, the user sees "Processing your payment..." indefinitely. Phase 2 should add a timeout + support fallback.
+
+---
+
 ## Progress Update as of 2026-05-02 05:02 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update

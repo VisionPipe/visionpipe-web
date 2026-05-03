@@ -4,7 +4,14 @@ export async function findOrCreateUserByEmail(email: string) {
   const client = await clerkClient();
   const existing = await client.users.getUserList({ emailAddress: [email], limit: 1 });
   if (existing.data.length > 0) return existing.data[0];
-  return client.users.createUser({ emailAddress: [email] });
+  // skipPasswordRequirement + skipPasswordChecks: Clerk Backend API rejects
+  // emailAddress-only users with 422 when the instance config requires a
+  // password, even if the dashboard sign-up flow is magic-link only.
+  return client.users.createUser({
+    emailAddress: [email],
+    skipPasswordRequirement: true,
+    skipPasswordChecks: true,
+  });
 }
 
 export async function findOrCreateOrgForUser(userId: string, name: string) {
