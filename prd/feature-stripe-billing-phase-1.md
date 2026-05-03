@@ -4,6 +4,24 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 05:50 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Caught the second "Let's Talk"-style CTA on `/pricing` that the prior bottom-CTA fix missed: the FAQ entry "How do I get a commercial license?" still answered with `mailto:hello@visionpipe.ai`. Replaced with a "Buy Credits" link to `#credit-packs` plus a short clarifying sentence ("Each credit pack includes a commercial license for the credits you purchase.").
+
+### Detail of changes made:
+
+- `src/app/pricing/page.tsx` (FAQ array entry "How do I get a commercial license?"): swapped the mailto-anchored answer for an in-page anchor reading "Buy Credits" pointing to `#credit-packs`. Added one sentence explaining the bundling so visitors know clicking through ≠ free credits.
+- Verified via grep: no remaining `mailto:`, `Contact Us`, or `Let's Talk`-style copy on `/pricing`.
+
+### Potential concerns to address:
+
+- Bottom-CTA section still has a primary "Download Now" button next to the (now correct) "Buy Credits" secondary button — both intentional.
+- Hero copy "Free for Developers. Commercial License for Business." still uses the older licensing language; if founder wants a credits-first hero too, that's a separate (bigger) edit. Not changed without explicit ask.
+
+---
+
 ## Progress Update as of 2026-05-02 05:47 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update

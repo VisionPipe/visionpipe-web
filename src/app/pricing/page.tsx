@@ -52,15 +52,14 @@ const faqs: { q: ReactNode; a: ReactNode }[] = [
     q: "How do I get a commercial license?",
     a: (
       <>
-        Email us at{" "}
         <a
-          href="mailto:hello@visionpipe.ai"
+          href="#credit-packs"
           className="text-cream underline hover:text-teal"
         >
-          hello@visionpipe.ai
-        </a>{" "}
-        to discuss pricing and terms. We&rsquo;ll work with you to find the
-        right arrangement for your team.
+          Buy Credits
+        </a>
+        . Each credit pack includes a commercial license for the credits you
+        purchase.
       </>
     ),
   },
