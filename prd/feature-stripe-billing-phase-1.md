@@ -4,6 +4,23 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 05:45 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Replaced the bottom-of-page "Get a Commercial License" mailto on `/pricing` with "Buy Credits" anchored to `#credit-packs`. Founder's preference: no "Let's Talk"-style CTAs — direct funnel to the credit-packs section instead.
+
+### Detail of changes made:
+
+- `src/app/pricing/page.tsx` (lines 237-242): the bottom CTA `<a>` now reads "Buy Credits" and links to `#credit-packs` (the same anchor the Commercial card's "View Credit Packs ↓" uses). Existing classes preserved so it visually matches the Commercial card's secondary-CTA style.
+
+### Potential concerns to address:
+
+- The Commercial card itself (top of page, right column) still reads "View Credit Packs ↓" — a different label for the same destination. If founder wants both buttons to read "Buy Credits" verbatim, that's a one-line follow-up; not changed without explicit ask.
+- Bottom CTA also still has a primary "Download Now" button alongside it — kept intact since founder's note was specifically about the "Let's Talk" mailto, not the primary download flow.
+
+---
+
 ## Progress Update as of 2026-05-02 05:15 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update

@@ -235,10 +235,10 @@ export default function PricingPage() {
               Download Now
             </a>
             <a
-              href="mailto:hello@visionpipe.ai"
+              href="#credit-packs"
               className="rounded-lg border border-teal/30 px-6 py-3 text-sm font-semibold text-cream transition hover:border-teal/60"
             >
-              Get a Commercial License
+              Buy Credits
             </a>
           </div>
         </div>
