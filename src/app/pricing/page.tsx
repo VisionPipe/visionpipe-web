@@ -153,7 +153,7 @@ export default function PricingPage() {
                 Commercial
               </h2>
               <p className="mt-4 text-4xl font-bold text-cream">
-                Let&rsquo;s talk
+                Buy Credits
               </p>
               <p className="mt-2 text-sm text-muted">
                 Flexible pricing for teams and businesses.

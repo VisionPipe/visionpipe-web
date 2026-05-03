@@ -4,6 +4,24 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 06:00 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+Found the actual "Let's talk" the founder was seeing — it was the **price-slot** text on the Commercial tier card (where Personal shows "Free"). Earlier searches missed it because the apostrophe was encoded as `&rsquo;` so case-insensitive grep for `let.s talk` didn't match across the entity. Replaced "Let's talk" with "Buy Credits" verbatim per founder's instruction.
+
+### Detail of changes made:
+
+- `src/app/pricing/page.tsx` line 156: changed the Commercial tier card's price-slot text from `Let&rsquo;s talk` to `Buy Credits`. Preserved the existing `text-4xl font-bold text-cream` styling so it visually matches the "Free" text on the Personal card.
+- Verified via grep across all of `src/`: no remaining "Let's talk" variants.
+
+### Potential concerns to address:
+
+- The Commercial card's subtagline still reads "Flexible pricing for teams and businesses." which is slightly off-message now that the card is a buy-credits CTA. Not changed without explicit ask. If founder wants it to read "Pay-as-you-go credits" or similar, one-line follow-up.
+- Lesson learned for future grep work: HTML entities (`&rsquo;`, `&mdash;`, etc.) defeat naive grep — should use a more permissive pattern or strip entities before searching.
+
+---
+
 ## Progress Update as of 2026-05-02 05:50 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
