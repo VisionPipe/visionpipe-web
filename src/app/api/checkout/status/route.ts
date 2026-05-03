@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/db/client';
 import { purchases } from '@/db/schema';
 import { eq } from 'drizzle-orm';
+import { stripe } from '@/lib/stripe';
 
 export const runtime = 'nodejs';
 
@@ -22,9 +23,20 @@ export async function GET(req: Request) {
     return NextResponse.json({ status: 'pending' });
   }
 
+  // Only pull the email from Stripe once we have a row — keeps polling cheap
+  // while the webhook is still processing, and avoids a Stripe call per poll.
+  let email: string | null = null;
+  try {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    email = session.customer_details?.email ?? null;
+  } catch {
+    // Non-fatal: success page falls back to "your account" copy if email is null
+  }
+
   return NextResponse.json({
     status: purchase.status === 'complete' ? 'complete' : 'pending',
     credits: purchase.creditsPurchased,
     sku: purchase.sku,
+    email,
   });
 }

@@ -11,6 +11,7 @@ function CheckoutSuccessInner() {
   const sessionId = params.get('session_id');
   const [status, setStatus] = useState<'pending' | 'complete'>('pending');
   const [credits, setCredits] = useState<number | null>(null);
+  const [email, setEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -22,6 +23,7 @@ function CheckoutSuccessInner() {
       if (data.status === 'complete') {
         setStatus('complete');
         setCredits(data.credits);
+        setEmail(data.email ?? null);
         if (isSignedIn) {
           setTimeout(() => router.push('/dashboard'), 1500);
         }
@@ -46,7 +48,10 @@ function CheckoutSuccessInner() {
         ) : (
           <>
             <h1 className="text-3xl font-bold text-cream">Payment received!</h1>
-            <p className="mt-4 text-muted">{credits?.toLocaleString()} credits added to your account.</p>
+            <p className="mt-4 text-muted">
+              {credits?.toLocaleString()} credits added to{' '}
+              {email ? <span className="text-cream font-medium">{email}</span> : 'your account'}.
+            </p>
             {!isSignedIn && (
               <p className="mt-4 text-cream">
                 Check your email for a sign-in link to access your dashboard.

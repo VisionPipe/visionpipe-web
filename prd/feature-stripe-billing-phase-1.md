@@ -4,6 +4,25 @@ This branch implements Phase 1 of the Stripe credit billing system per the spec 
 
 ---
 
+## Progress Update as of 2026-05-02 05:47 PM PDT
+*(Most recent updates at top)*
+### Summary of changes since last update
+
+End-to-end purchase flow now works (Clerk config fixed by founder, Stripe webhook lands org/membership/purchase rows successfully). Per founder's request, updated `/checkout/success` to show the buyer's email instead of the generic "your account" copy: "1,000 credits added to buyer@example.com".
+
+### Detail of changes made:
+
+- `src/app/api/checkout/status/route.ts`: now retrieves the Stripe Checkout Session via `stripe.checkout.sessions.retrieve(sessionId)` once the local purchase row exists, and returns `email` (from `customer_details.email`) in the JSON response. The Stripe call is gated on the purchase already existing — keeps polling cheap during the pending window. Wrapped in try/catch so polling stays alive if Stripe hiccups (page falls back to "your account" copy).
+- `src/app/checkout/success/page.tsx`: added `email` state, populated from the polling response. Success copy now reads "{N} credits added to {email}" with the email rendered in the cream/medium-weight color for emphasis. Falls back to "your account" if email is null (defensive).
+- 20/20 tests still pass; tsc clean.
+
+### Potential concerns to address:
+
+- Each poll on a completed purchase makes one Stripe API call (`sessions.retrieve`). That's ~1 extra call per finished checkout (since polling stops once status is complete). Trivial in volume, not worth caching for Phase 1.
+- The success page now shows the email even if the buyer is signed out. They'll auto-sign-in via the magic-link email anyway, so this is fine and helpful — they can confirm "yes, that's the email I bought with."
+
+---
+
 ## Progress Update as of 2026-05-02 05:45 PM PDT
 *(Most recent updates at top)*
 ### Summary of changes since last update
