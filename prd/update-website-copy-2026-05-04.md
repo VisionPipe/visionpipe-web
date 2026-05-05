@@ -4,6 +4,21 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-05 19:35 UTC
+
+### Summary of changes since last update
+Moved this progress doc from `prd/branch commit updates/update-website-copy-2026-05-04.md` to `prd/update-website-copy-2026-05-04.md` to match the actual repo convention (the existing `prd/` directory already has `prd/main.md`, `prd/PRD.md`, `prd/feature-stripe-billing-phase-1.md`, and `prd/feature-website-updates.md` at the top level). The original CLAUDE.md instruction pointed at a nested `prd/branch commit updates/` folder that doesn't exist in this repo; the post-commit hook surfaced the mismatch.
+
+### Detail of changes made:
+- `git mv "prd/branch commit updates/update-website-copy-2026-05-04.md" prd/update-website-copy-2026-05-04.md` — single rename, no content change.
+- Removed the now-empty `prd/branch commit updates/` directory.
+- Prepended this entry to keep the progress log convention satisfied for the rename commit itself.
+
+### Potential concerns to address:
+- **`CLAUDE.md` is out of sync with actual repo convention.** It instructs progress logs to live at `prd/branch commit updates/<branch>.md`, but the on-disk reality (and the hook's expectation) is `prd/<branch>.md`. Worth a separate small PR to fix the CLAUDE.md so the next branch doesn't make the same mistake. Not done in this commit to keep the rename atomic.
+
+---
+
 ## Progress Update as of 2026-05-04 19:30 UTC
 
 ### Summary of changes since last update
