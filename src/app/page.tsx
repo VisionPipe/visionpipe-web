@@ -380,8 +380,22 @@ export default function Home() {
           <h1 className="text-5xl font-bold tracking-tight text-cream sm:text-7xl">
             Give Your LLM Vision
           </h1>
-          <p className="mt-4 font-mono text-xl text-teal sm:text-2xl">
-            A Picture is Worth a Thousand Prompts
+          <p className="mt-6 font-mono text-xl text-teal sm:text-2xl">
+            A Picture is Worth a Thousand{" "}
+            <span className="relative inline-block">
+              {/* "Tokens" — handwritten, written above in amber */}
+              <span className="absolute -top-6 left-1/2 -translate-x-1/2 -rotate-[6deg] whitespace-nowrap font-handwritten text-3xl font-bold leading-none text-amber sm:-top-7 sm:text-4xl">
+                Tokens
+              </span>
+              {/* "Words" with a straight strikethrough, angled ~10° upward */}
+              <span className="relative inline-block">
+                Words
+                <span
+                  className="pointer-events-none absolute left-0 right-0 top-1/2 h-[3px] origin-center -translate-y-1/2 -rotate-[10deg] rounded-full bg-amber"
+                  aria-hidden="true"
+                />
+              </span>
+            </span>
           </p>
         </div>
 
@@ -537,7 +551,7 @@ export default function Home() {
       <section className="border-t border-white/5 px-6 py-24">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center text-3xl font-bold text-cream sm:text-4xl">
-            One Session. Complete LLM Spec.
+            Turn Screenshots into Markdown Specs Your LLM Wants
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-center text-muted">
             Five steps from hotkey to handoff.

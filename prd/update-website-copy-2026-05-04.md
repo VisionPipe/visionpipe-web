@@ -4,6 +4,30 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-06 21:00 UTC
+
+### Summary of changes since last update
+Reworked the hero subhead with a "scratch handwriting" effect — "A Picture is Worth a Thousand ~~Words~~ Tokens" — and tightened a couple of headlines. Added the Caveat handwritten font via `next/font/google`.
+
+### Detail of changes made:
+- `src/app/layout.tsx` + `src/app/globals.css`: added Caveat (Google Font) via `next/font/google`, exposed as the `--font-handwritten` CSS variable, with `"Bradley Hand"` and `cursive` as fallbacks. Available as `font-handwritten` Tailwind utility.
+- `src/app/page.tsx` hero subhead: was `"A Picture is Worth a Thousand Prompts"` (mono teal). Now `"A Picture is Worth a Thousand "` followed by an inline-block span containing:
+  - `"Words"` with an absolutely-positioned amber line overlay (`h-[3px] rounded-full bg-amber`) rotated `-10deg` and centered, providing a clean upward-angled strikethrough.
+  - `"Tokens"` floating above in `font-handwritten` (Caveat 700) at `text-3xl sm:text-4xl`, rotated `-6deg`, in amber, positioned via `absolute -top-6 left-1/2 -translate-x-1/2`.
+- `src/app/page.tsx` "How It Works" section heading: `"One Session. Complete LLM Spec."` → `"Turn Screenshots into Markdown Specs Your LLM Wants"`.
+- `src/components/HeroCarousel.tsx` carousel step 3 sentence: `"The LLM Spec turns your images and narration into machine readable output."` → `"The LLM spec turns your images and narration into a machine readable .md file."`. Note the lowercase `spec` and explicit `.md` filename callout.
+
+### Verification performed:
+- `npx tsc --noEmit` clean.
+- Visual confirmation in dev server: handwriting font loads via `next/font` (no FOUT), strikethrough renders with amber line at the right tilt, "Tokens" sits above "Words" without clipping at the section boundary.
+
+### Potential concerns to address:
+- **Caveat adds another font weight to the bundle.** Two weights (600, 700) ≈ a few KB after Brotli; effectively free, but worth noting.
+- **The `-rotate-[10deg]` strikethrough is an inline absolutely-positioned span, not a real `text-decoration`.** Means screen readers will not announce "Words" as struck through. Acceptable for marketing prose but if accessibility-strict, wrap "Words" in `<s>...</s>` or use `<del>` so assistive tech announces the deletion.
+- **The hero subhead now overflows its parent line height vertically** because "Tokens" floats above with `-top-6` (`-1.5rem`). The hero section's `py-24 sm:py-32 lg:py-40` has plenty of room above so it doesn't visually clip, but if anyone reduces that vertical padding the "Tokens" text may collide with the H1.
+
+---
+
 ## Progress Update as of 2026-05-06 20:30 UTC
 
 ### Summary of changes since last update

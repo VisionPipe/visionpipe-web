@@ -75,7 +75,7 @@ const steps: Step[] = [
   },
   {
     num: 3,
-    sentence: "The LLM Spec turns your images and narration into machine readable output.",
+    sentence: "The LLM spec turns your images and narration into a machine readable .md file.",
     expandable: {
       minimizedSrc: "/images/screenshots/markdown-llm-spec-output-minimized.png",
       fullSrc: "/images/screenshots/markdown-llm-spec-output.png",

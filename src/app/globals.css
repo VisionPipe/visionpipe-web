@@ -16,6 +16,7 @@
 
   --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "Source Code Pro", ui-monospace, monospace;
+  --font-handwritten: "Caveat", "Bradley Hand", cursive;
 }
 
 html {
