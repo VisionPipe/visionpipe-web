@@ -387,7 +387,9 @@ export default function HeroCarousel() {
 
   return (
     <div
-      className="mx-auto mt-12 max-w-4xl"
+      className={`mx-auto mt-12 transition-[max-width] duration-300 ease-out ${
+        expanded ? "max-w-[84rem]" : "max-w-4xl"
+      }`}
       onMouseEnter={() => {
         setPaused(true);
         cancelCollapse();
