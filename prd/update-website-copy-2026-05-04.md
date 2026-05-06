@@ -4,6 +4,28 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-06 00:30 UTC
+
+### Summary of changes since last update
+Standardized the `Vision|Pipe` wordmark rendering across the site so that the words "Vision" and "Pipe" inherit the surrounding text color (whatever it is — cream, white, etc.) and only the `|` character is colored, always with the amber accent token. Previously the pipe (and in some places "Pipe" itself) was teal, and the convention was inconsistent — Header and Footer wrapped `|Pipe` together in a teal span (so "Pipe" picked up the accent color too), while the homepage/pricing/download wrapped just the pipe character. New behavior: only the `|` is amber; everything else inherits.
+
+### Detail of changes made:
+- `src/components/VPName.tsx` — canonical wordmark; pipe span color `text-teal` → `text-amber`.
+- `src/components/Header.tsx` (line 23) — split the joint `<span className="text-teal">|Pipe</span>` into `<span className="text-amber">|</span>Pipe` so "Pipe" inherits the cream text color of the surrounding logo lockup.
+- `src/components/Footer.tsx` (line 11, brand block) — same split as Header, joint span → discrete amber pipe.
+- `src/components/Footer.tsx` (line 126, copyright) — pipe span color `text-teal` → `text-amber`.
+- `src/app/page.tsx` — `replace_all` on `<span className="text-teal">|</span>` → `<span className="text-amber">|</span>` (covers the local `VP()` helper at line 8 and all inline body usages, ~16 occurrences in rendered HTML). Also fixed the workflow comparison column header at line 466 which was rendered as plain unstyled text `Vision|Pipe` inside a teal-colored `<p>` — now uses cream text with an amber-pipe span so it follows the same convention.
+- `src/app/pricing/page.tsx` — `replace_all` for the pipe span color, covers the local `VP()` helper plus inline body usages.
+- `src/app/download/page.tsx` (H1) — pipe span color updated.
+- Verified via curl + grep on rendered HTML: `text-amber">|` appears 16× on `/`, 9× on `/pricing`, 4× on `/download`. Zero `text-teal">|` remaining.
+- No edits to alt strings, page metadata titles, the markdown sample bundle, file paths (`~/Pictures/VisionPipe/`, `/downloads/VisionPipe.dmg`), or domain references (`x.com/Vision_Pipe`, `visionpipe.ai`) — those are plain text, not styled UI, and shouldn't get spans injected into them.
+
+### Potential concerns to address:
+- **`VPName` component is still unused at the call sites that have local `VP()` helpers** (page.tsx line 4-7, pricing/page.tsx line 11-13). The duplicates are now visually identical to `VPName` post-edit; a future cleanup could replace each local helper with `import VPName from "@/components/VPName"` to consolidate. Not done here to keep the change scope tight to color-only.
+- **No layout/typography change** beyond the color swap. If the design later wants the pipe to be visually heavier (bold, slightly larger, kerning adjustment), it should be applied inside `VPName.tsx` as the canonical place — that's the upside of consolidating to it later.
+
+---
+
 ## Progress Update as of 2026-05-05 19:35 UTC
 
 ### Summary of changes since last update

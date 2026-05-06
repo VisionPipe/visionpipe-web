@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 function VP() {
-  return <>Vision<span className="text-teal">|</span>Pipe</>;
+  return <>Vision<span className="text-amber">|</span>Pipe</>;
 }
 
 const faqs: { q: ReactNode; a: ReactNode }[] = [

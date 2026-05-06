@@ -1,7 +1,7 @@
 export default function VPName() {
   return (
     <>
-      Vision<span className="text-teal">|</span>Pipe
+      Vision<span className="text-amber">|</span>Pipe
     </>
   );
 }

@@ -5,7 +5,7 @@ import MarkdownExample from "@/components/MarkdownExample";
 import WaitlistForm from "@/components/WaitlistForm";
 
 function VP() {
-  return <>Vision<span className="text-teal">|</span>Pipe</>;
+  return <>Vision<span className="text-amber">|</span>Pipe</>;
 }
 
 const steps = [
@@ -462,8 +462,8 @@ export default function Home() {
               </div>
             </div>
             <div className="rounded-xl border border-teal/30 bg-deep-forest p-6">
-              <p className="text-xs font-semibold uppercase tracking-wider text-teal">
-                Vision|Pipe
+              <p className="text-xs font-semibold uppercase tracking-wider text-cream">
+                Vision<span className="text-amber">|</span>Pipe
               </p>
               <div className="mt-4 space-y-2 font-mono text-sm text-cream">
                 <p>Capture(s) + Narrate</p>
