@@ -4,6 +4,71 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-06 21:30 UTC
+
+### Summary of changes since last update
+Replaced the `mailto:` stub on the Cloud Share waitlist form with a real `POST /api/waitlist` route that writes to a new Drizzle `waitlist` table and fires a notification email. The form UX got upgraded to handle pending/error/success states inline. Migration SQL is generated and committed; user needs to apply it to the production Neon DB before the route works in prod.
+
+### Detail of changes made:
+
+**Schema (`src/db/schema.ts`):** added a new `waitlist` table:
+```ts
+{
+  id: bigserial primary key,
+  email: text not null,
+  feature: text not null,           // e.g., "Cloud Share"
+  source: text,                      // referer header, for tracking origin
+  user_agent: text,                  // for spam/abuse triage if needed
+  created_at: timestamp with tz default now() not null,
+  // unique index on (email, feature) for idempotent signups
+}
+```
+The `(email, feature)` unique index lets the API use `ON CONFLICT DO NOTHING` so the same person clicking the form twice is a no-op rather than an error or duplicate row. Source/user-agent are pulled from request headers — useful if we ever need to audit where signups came from or filter bot traffic.
+
+**Migration generated** via `npx drizzle-kit generate`: `drizzle/0001_broken_jackpot.sql` + updated snapshot in `drizzle/meta/0001_snapshot.json`. Migration is offline-generated (no DB needed); applying it requires `npx drizzle-kit migrate` against a live `DATABASE_URL`.
+
+**API route (`src/app/api/waitlist/route.ts`):**
+- `POST /api/waitlist` accepts `{ email: string, feature: string }`.
+- Validates: email matches a basic regex + ≤254 chars; feature is non-empty + ≤64 chars. Returns 400 on validation failure.
+- Inserts via Drizzle with `.onConflictDoNothing({ target: [waitlist.email, waitlist.feature] })` — duplicate signup returns 200 without inserting.
+- Captures `referer` and `user-agent` headers as `source` / `userAgent` columns automatically.
+- Fires `sendWaitlistNotification` (Resend) on actual new inserts only (skipped on duplicate). Fire-and-forget — email failure does NOT fail the request.
+- Returns `{ ok: true }` on success, `{ error: "..." }` with 4xx/500 on failures.
+- Not gated by Clerk middleware (only `/dashboard` and `/api/me` are protected per `src/middleware.ts`).
+
+**Email helper (`src/lib/email.ts`):** added `sendWaitlistNotification(feature, email, source?)`. Sends to `hello@visionpipe.ai` with subject `[VisionPipe] Waitlist signup: {feature}`. If `RESEND_API_KEY` is unset, logs a console warning and resolves silently (matches the existing pattern from `sendMagicLink` / `sendDisputeAlert`).
+
+**Form (`src/components/WaitlistForm.tsx`):** rewritten:
+- Replaced the `mailto:` stub with a real `fetch("/api/waitlist", { method: "POST", body: JSON.stringify({ email, feature }) })`.
+- Added a `Status` state machine (`idle | submitting | success | error`).
+- While submitting: input + button disabled with reduced opacity, button label changes to "Saving…".
+- On error: inline error message shown below the form using `text-sienna`.
+- On success: replaces the form with the existing thank-you message.
+- Removed the `// NOTE: mailto stub` comment.
+
+### Verification performed:
+- `npx tsc --noEmit` clean.
+- `npx drizzle-kit generate` produced `drizzle/0001_broken_jackpot.sql` cleanly with the expected DDL.
+- API route logic walked through manually; not exercised end-to-end because the local `.env.local` and Vercel Preview environments both have placeholder `DATABASE_URL` values, so the actual insert would fail at the Neon connection step.
+
+### Required follow-up before this works in production:
+- **Apply the migration to the production Neon database.** With the production `DATABASE_URL` exported, run:
+  ```
+  npx drizzle-kit migrate
+  ```
+  This will apply `drizzle/0001_broken_jackpot.sql` to the live DB and create the `waitlist` table. Until this is done, the `/api/waitlist` route will return 500 on any submission with a "relation 'waitlist' does not exist" error in the server logs.
+- **Verify `RESEND_API_KEY` is set in Production env vars** (it should be — it's already used by the magic-link flow). Without it, signups still get recorded in the DB, but the notification email is silently skipped.
+- **Optional: consider a Preview-scoped Neon branch** so Preview deploys can exercise the waitlist end-to-end. Without it, Preview deploys will record `text-sienna` errors when the form is submitted (DB connection refused on placeholder URL).
+
+### Potential concerns to address:
+- **No rate limiting on `/api/waitlist`.** A malicious actor could spam-submit emails. Reasonable next step: add Upstash Redis rate-limiting per IP (10 reqs/hour or similar) — same pattern that would belong on `/api/checkout` if it doesn't already have it.
+- **No email verification (double-opt-in).** Signups are immediate. If you want a confirmation email + click-to-confirm flow, that's a future iteration; not blocking the waitlist's core purpose (capturing intent + contact info).
+- **The `source` column captures the referer header** — for marketing attribution. Currently nothing reads it; it's just stored. Future analytics could pivot signups by source.
+- **Notification email goes to `hello@visionpipe.ai`.** Make sure that inbox is monitored or set up forwarding/Slack integration; otherwise signups accumulate silently. The DB row is the source of truth regardless.
+- **The strikethrough handwritten span on the hero subhead** still has no semantic markup (`<s>` / `<del>`). Same accessibility note as last entry; acceptable for marketing prose but worth knowing.
+
+---
+
 ## Progress Update as of 2026-05-06 21:00 UTC
 
 ### Summary of changes since last update

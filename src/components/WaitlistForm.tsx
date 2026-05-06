@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 
-// NOTE: This is a temporary mailto-based stub. A proper API route
-// (POST /api/waitlist writing to a Drizzle table) is a planned follow-up.
-// The visible UX is identical to what a real form would look like.
+type Status = "idle" | "submitting" | "success" | "error";
+
 export default function WaitlistForm({
   feature,
   className = "",
@@ -13,20 +12,33 @@ export default function WaitlistForm({
   className?: string;
 }) {
   const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
-    const subject = encodeURIComponent(`${feature} waitlist`);
-    const body = encodeURIComponent(
-      `Notify me when ${feature} ships.\n\nEmail: ${email}`,
-    );
-    window.location.href = `mailto:hello@visionpipe.ai?subject=${subject}&body=${body}`;
-    setSubmitted(true);
+    if (!email || status === "submitting") return;
+
+    setStatus("submitting");
+    setErrorMsg(null);
+    try {
+      const res = await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, feature }),
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error ?? "Something went wrong");
+      }
+      setStatus("success");
+    } catch (err) {
+      setStatus("error");
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong");
+    }
   };
 
-  if (submitted) {
+  if (status === "success") {
     return (
       <p className={`text-sm text-teal ${className}`}>
         Thanks — we&rsquo;ll let you know when {feature} ships.
@@ -44,15 +56,20 @@ export default function WaitlistForm({
         required
         value={email}
         onChange={(e) => setEmail(e.target.value)}
+        disabled={status === "submitting"}
         placeholder="you@team.com"
-        className="flex-1 rounded-lg border border-white/10 bg-deep-forest px-4 py-2.5 text-sm text-cream placeholder:text-muted-dim focus:border-teal/50 focus:outline-none focus:ring-1 focus:ring-teal/30"
+        className="flex-1 rounded-lg border border-white/10 bg-deep-forest px-4 py-2.5 text-sm text-cream placeholder:text-muted-dim focus:border-teal/50 focus:outline-none focus:ring-1 focus:ring-teal/30 disabled:opacity-60"
       />
       <button
         type="submit"
-        className="rounded-lg bg-teal px-5 py-2.5 text-sm font-semibold text-cream transition hover:bg-teal-light"
+        disabled={status === "submitting"}
+        className="rounded-lg bg-teal px-5 py-2.5 text-sm font-semibold text-cream transition hover:bg-teal-light disabled:opacity-60"
       >
-        Notify me
+        {status === "submitting" ? "Saving…" : "Notify me"}
       </button>
+      {status === "error" && errorMsg && (
+        <p className="text-xs text-sienna sm:basis-full">{errorMsg}</p>
+      )}
     </form>
   );
 }
