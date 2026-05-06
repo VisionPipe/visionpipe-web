@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export default function MarkdownExample({
   content,
-  filename = "transcript.md",
+  filename = "VisionPipe-Spec-for-My-App-May-6-2026-10-21-AM-UTC.md",
   className = "",
 }: {
   content: string;
@@ -23,12 +23,14 @@ export default function MarkdownExample({
     <div
       className={`overflow-hidden rounded-xl border border-white/10 bg-deep-forest ${className}`}
     >
-      <div className="flex items-center justify-between border-b border-white/5 bg-forest/60 px-4 py-2.5">
-        <div className="flex items-center gap-2">
-          <span className="h-2.5 w-2.5 rounded-full bg-sienna/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-amber/70" />
-          <span className="h-2.5 w-2.5 rounded-full bg-teal/70" />
-          <span className="ml-3 font-mono text-xs text-muted-dim">{filename}</span>
+      <div className="flex items-center justify-between gap-3 border-b border-white/5 bg-forest/60 px-4 py-2.5">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-sienna/70" />
+          <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-amber/70" />
+          <span className="h-2.5 w-2.5 shrink-0 rounded-full bg-teal/70" />
+          <span className="ml-3 truncate font-mono text-xs text-muted-dim">
+            {filename}
+          </span>
         </div>
         <button
           onClick={handleCopy}

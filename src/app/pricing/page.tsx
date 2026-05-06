@@ -98,7 +98,7 @@ const faqs: { q: ReactNode; a: ReactNode }[] = [
           share.visionpipe.app
         </code>
         . Anyone with the link can preview the session in their browser or
-        download the markdown brief. Each upload costs 50 credits ($0.50).{" "}
+        download the markdown LLM Spec. Each upload costs 50 credits ($0.50).{" "}
         <a
           href="/#features"
           className="text-cream underline hover:text-teal"

@@ -4,6 +4,94 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-06 18:00 UTC
+
+### Summary of changes since last update
+Built a 6-step interactive hero carousel with click-to-expand previews and real LLM testimonials (Claude Code and OpenAI Codex evaluating Vision|Pipe LLM Specs). Replaced the static body paragraph in the hero with `<HeroCarousel />`. Added brand icon SVGs (Claude Code, Codex, OpenAI), 12 product screenshots paired as minimized + full versions for the carousel, and a real favicon. Reworked a number of section headlines and changed "Brief" → "LLM Spec" sitewide. Most user-facing copy on `/` now reflects the v0.6.1 product story with this iteration.
+
+### Detail of changes made:
+
+**New `HeroCarousel.tsx` (~330 lines, client component):**
+- 6 slides on a 4-second auto-rotation, 4 of which are click-to-expand product screenshots and 2 are click-to-expand testimonials.
+- Each slide stores its full-image natural pixel dimensions (`fullWidth`/`fullHeight` or `proofImageWidth`/`proofImageHeight`); when the slide is expanded the carousel container's `aspectRatio` is set inline to match those exact dimensions, so the image is shown at its natural aspect with `object-contain` (no cropping). Collapsed state is a fixed `aspectRatio: "4 / 1"` strip.
+- Bottom-fade gradient on collapsed slides hints at "more below" via a `bg-gradient-to-t from-deep-forest via-deep-forest/70 to-transparent` overlay (50% height); fades out when expanded.
+- Both the minimized AND full image render in the DOM simultaneously and crossfade via opacity transitions, so swap is instantaneous (no flash on click).
+- Prev/Next arrow buttons flank the slide stack (in a flex row), 3 dots below center, sentence directly below the slide. Sentence is bold + cream + min-h-[2.5rem] so layout doesn't jump as text changes.
+- Pause-and-expansion mouse handling is on the **whole carousel container** (slides + arrows + dots), not the slide alone. Effect: moving the mouse from an expanded slide to an arrow does NOT collapse — user can flip through expanded images via arrows. 800ms collapse delay (was 400ms initially) gives time to traverse.
+- Navigating to a non-expandable step force-collapses; navigating between expandable steps preserves expansion. Setting `expanded = false` on `activeIndex` change is conditional on the new step not being expandable.
+- Setup uses `setTimeout` (not `setInterval`) re-armed on `[paused, activeIndex]` so manual navigation cleanly resets the auto-rotate cadence.
+- Accessibility: `role="region" aria-roledescription="carousel"`, `aria-label`, `aria-current` on the active dot, `aria-expanded` on each expandable slide, `aria-hidden` on inactive slides + on the testimonial layer when the proof image is showing.
+
+**Carousel content (in order):**
+1. App split-view session screenshot — `app-session-split-view-{minimized,full}.png`, expanded aspect 3402×2142.
+2. Finder folder layout — `finder-session-folder-{minimized,full}.png`, expanded aspect 2892×846 (very wide; barely taller than collapsed).
+3. Markdown LLM Spec output — `markdown-llm-spec-output-{minimized,full}.png`, expanded aspect 3392×2154.
+4. JSON sidecar output — `json-sidecar-output-{minimized,full}.png`, expanded aspect 2818×2140.
+5. Claude Code testimonial — quote "*This format is roughly 3–5× more useful to me than a prompt describing the same request...*", attributed "Claude Code (Opus 4.7), evaluating a Vision|Pipe LLM Spec". Expands to `claude-code-evaluating-llm-spec.png` (the actual Claude Code session that produced the quote).
+6. OpenAI Codex testimonial — quote "*This is 2–5× more useful than a text-only prompt. In some cases closer to 10× when the prompt is vague...*", attributed "OpenAI Codex (GPT 5.4), evaluating a Vision|Pipe LLM Spec". Expands to `codex-evaluating-llm-spec.png`.
+
+**Sentence below the carousel (rotates with slide):**
+1. "Use Vision|Pipe to capture and narrate screenshots."
+2. "Turn your screenshots and narration into an LLM Spec with 1-click."
+3. "The LLM Spec turns your images and narration into machine readable output."
+4. "Vision|Pipe also sends detailed metadata to the LLM"
+5. + 6. (both): "Your LLM will thank you for the clarity of vision."
+
+**Brand icons (`public/images/brand/`):**
+- `claude.svg` — pulled from `cdn.simpleicons.org/claude` (the regular Claude orange spiral). Currently unused on the site but kept for future use.
+- `claude-code.svg` — pulled from lobe-icons (`claudecode` slug); pixel-art "Claude Code" mark. `fill="currentColor"` was hardcoded to `#D97757` (Anthropic orange) so it renders without depending on parent CSS color (which doesn't propagate through `<img>`).
+- `codex.svg` — pulled from lobe-icons (`codex` slug); the OpenAI Codex prompt mark. Hardcoded `fill="#f5f0e8"` (cream from the design tokens) so it's visible on the deep-forest background.
+- `openai.svg` — pulled from lobe-icons (`openai` slug). Currently unused.
+
+**Screenshots (`public/images/screenshots/`, all renamed from Zight defaults):**
+- 6 paired files: each slide has a `*-minimized.png` (designed for the 4:1 strip) and a full version (the source image at its natural aspect). User created the minimized versions; I downloaded the full set and renamed both groups.
+- 2 LLM session screenshots: `claude-code-evaluating-llm-spec.png` (2506×1898) + `codex-evaluating-llm-spec.png` (1514×1398).
+
+**New components:**
+- `src/components/HeroCarousel.tsx` — described above.
+- (Pre-existing this session: `ComingSoon`, `MarkdownExample`, `WaitlistForm`.)
+
+**Favicon (`src/app/icon.png`):**
+- Copied `public/images/visionpipe-logo-no-background.png` (1024×1024 transparent) into `src/app/icon.png`. Next.js App Router auto-detects and emits `<link rel="icon" href="/icon.png" sizes="1024x1024" type="image/png">` — no manual `metadata.icons` config needed.
+
+**Wordmark consistency (already partially landed in earlier commit):**
+- This session: `<VP />` rendered everywhere with the amber pipe and inheriting text color. Workflow comparison column header (`Vision|Pipe` plain text in a `<p className="text-teal">`) was rebuilt as cream text with an amber-pipe span. All `font-mono text-teal` plain "Vision|Pipe" text replaced.
+
+**Copy edits on the homepage (`src/app/page.tsx`):**
+- Hero H1: `"Give your LLM eyes."` → `"Give Your LLM Vision"` (period removed, capitalized).
+- Subhead: `"screenshot | llm — now a reality."` (mono) → `"A Picture is Worth a Thousand Prompts"` (mono kept, bumped to `text-xl sm:text-2xl`).
+- Body paragraph + "built for developers who think in pipes" tagline → fully replaced by `<HeroCarousel />`.
+- Pain section H2: `"The Loop You're Stuck In"` → `"Stop Working Blind"`.
+- Pain section: parenthetical `"(Vision|Pipe is closing this gap next — see Cloud Share below.)"` removed from the third loop; it was redundant once Cloud Share is its own dedicated section.
+- Solution H2: `"Vision|Pipe Skips the Description"` → `"Show your LLM What You Mean"`.
+- New section H2: `"Not a Screenshot. A Brief."` → `"Not just screenshots. A full narrated LLM Spec"` (no trailing period — user style preference).
+- All instances of "Brief"/"Briefs" as a noun replaced with "LLM Spec"/"LLM Specs" sitewide (homepage + pricing). "Brief" as a VERB ("they brief Claude Code from memory") and unrelated words ("briefly shipped") were intentionally left alone.
+- "How It Works" section header: `"One Session. Complete Brief."` → `"One Session. Complete LLM Spec."`
+- Final CTA: `"Stop Pasting Screenshots. Start Delivering Briefs."` → `"Stop Pasting Screenshots. Start Delivering LLM Specs."`
+- Markdown sample filename: `transcript.md` → `VisionPipe-Spec-for-My-App-May-6-2026-10-21-AM-UTC.md`. Sample markdown content's session header date updated to match (`2026-05-06 10:21:00 UTC`). Feature-list bullet "Markdown LLM Spec output" desc rewritten to be filename-agnostic.
+
+**Pricing page (`src/app/pricing/page.tsx`):**
+- FAQ "Anyone with the link can preview the session... or download the markdown brief" → `"...download the markdown LLM Spec"`.
+
+**MarkdownExample component (`src/components/MarkdownExample.tsx`):**
+- File-tab area updated for long filenames: `gap-3` on the outer flex row, `min-w-0` + `truncate` on the filename span, `shrink-0` on the traffic-light dots. Long filenames now show an ellipsis instead of pushing the copy button off-screen on narrow viewports.
+
+### Verification performed:
+- `npx tsc --noEmit` — clean.
+- Visual check via dev server: all 6 carousel slides render; click-to-expand transitions smoothly to each image's natural aspect ratio with no cropping; arrow navigation while expanded preserves expansion; mouse-leave triggers 800ms collapse; favicon is emitted in the rendered HTML head.
+- `npm run build` was NOT run end-to-end (Clerk's runtime publishable-key validation prevents production build without real env values). TypeScript clean is high confidence; dev server clean.
+
+### Potential concerns to address:
+- **HeroCarousel is now ~330 lines.** Doing several jobs (rotation, expansion, mouse plumbing, three render branches: image / testimonial / placeholder). If it grows further, split: (a) `useCarouselRotation` hook for timer + activeIndex, (b) `useExpansion` hook for expanded + collapse timer, (c) move `Testimonial` / `ExpandableImageBox` / `ExpandableTestimonial` / `ArrowButton` to their own files. Not urgent at current size.
+- **Per-image `fullWidth`/`fullHeight` are hardcoded.** If a user replaces a screenshot file with a different aspect ratio without updating these constants, the box will be sized wrong. A more robust version would read dimensions from `<Image onLoad>`. Acceptable trade-off for now since the screenshots are stable.
+- **PNG screenshot weight.** `public/images/screenshots/` is ~17 MB across 12 files. None are referenced anywhere except by HeroCarousel. Could be compressed with WebP (lossless or lossy quality 90+) for a ~3-5× reduction without visible quality loss. Not done here.
+- **Codex testimonial proof image is small (1514×1398).** When expanded on a wide display the screenshot may look soft. If you have a higher-resolution version, swap it in (and update `proofImageWidth`/`proofImageHeight`).
+- **`public/images/brand/{claude,openai}.svg` are unused.** Left in place because they're cheap to keep around and likely useful in future testimonial slots.
+- **`public/images/claude-code-icon.webp` is also unused** — superseded by the SVG version. Could be deleted as a small follow-up cleanup.
+- **The pause/expansion handlers share the same container `onMouseEnter`/`onMouseLeave`.** Tested visually but I have not tested with rapid in/out cycles or unusual focus patterns (e.g., portal-rendered tooltips moving focus). If you observe stuck-paused or stuck-expanded states, that's the place to look.
+
+---
+
 ## Progress Update as of 2026-05-06 00:30 UTC
 
 ### Summary of changes since last update

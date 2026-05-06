@@ -1,6 +1,7 @@
 import Image from "next/image";
 import CopyBlock from "@/components/CopyBlock";
 import ComingSoon from "@/components/ComingSoon";
+import HeroCarousel from "@/components/HeroCarousel";
 import MarkdownExample from "@/components/MarkdownExample";
 import WaitlistForm from "@/components/WaitlistForm";
 
@@ -224,7 +225,7 @@ const competitors: Competitor[] = [
   },
 ];
 
-const sampleMarkdown = `# Vision|Pipe Session — 2026-05-05 14:32:01
+const sampleMarkdown = `# Vision|Pipe Session — 2026-05-06 10:21:00 UTC
 Duration: 2m 14s
 
 ---
@@ -263,7 +264,7 @@ const shippedFeatures = [
   { label: "Real-time on-device transcription", desc: "Talk while you capture; Apple Speech anchors transcripts to each screenshot. No audio leaves your machine." },
   { label: "Per-segment re-record", desc: "Fix any single piece of narration without losing the rest." },
   { label: "Two view modes", desc: "Interleaved (cards + inline narration) or split (cards left, transcript right)." },
-  { label: "Markdown brief output", desc: "transcript.md written to disk + clipboard, optimized for Claude Code, GPT, Gemini, etc." },
+  { label: "Markdown LLM Spec output", desc: "A timestamped, structured markdown file written to disk + clipboard, optimized for Claude Code, GPT, Gemini, etc." },
   { label: "HistoryHub", desc: "In-app browser for past sessions; reopen, copy, or show in Finder." },
   { label: "Editable captions", desc: "Name each screenshot inline; captions travel into the markdown bundle." },
   { label: "Scrolling capture", desc: "Capture content that extends beyond the visible viewport." },
@@ -340,24 +341,12 @@ export default function Home() {
             className="mx-auto mb-8"
           />
           <h1 className="text-5xl font-bold tracking-tight text-cream sm:text-7xl">
-            Give your LLM eyes.
+            Give Your LLM Vision
           </h1>
-          <p className="mt-4 font-mono text-lg text-teal sm:text-xl">
-            screenshot | llm — now a reality.
+          <p className="mt-4 font-mono text-xl text-teal sm:text-2xl">
+            A Picture is Worth a Thousand Prompts
           </p>
-          <p className="mx-auto mt-6 max-w-2xl text-lg text-muted">
-            <VP /> captures a narrated session of screenshots and delivers a
-            structured markdown brief — ready to paste or drag into Claude
-            Code, GPT, Gemini, or any vision-capable LLM. Developers use it to
-            brief their AI.{" "}
-            <span className="text-cream-dim">
-              <em>Coming soon:</em> PMs, designers, and QA teams use it to
-              brief their developers.
-            </span>
-          </p>
-          <p className="mt-2 text-base text-muted-dim">
-            Built for developers who think in pipes.
-          </p>
+          <HeroCarousel />
 
           {/* CTA cluster */}
           <div className="mt-10 flex flex-col items-center gap-4">
@@ -389,7 +378,7 @@ export default function Home() {
       <section className="border-t border-white/5 bg-deep-forest px-6 py-24">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-3xl font-bold text-cream sm:text-4xl">
-            The Loop You&rsquo;re Stuck In
+            Stop Working Blind
           </h2>
           <div className="mt-8 space-y-6 text-lg leading-relaxed">
             <p>
@@ -408,10 +397,7 @@ export default function Home() {
               what&rsquo;s wrong — but describing a visual problem in a Jira
               ticket is hopeless. So you schedule a call. The developer takes
               notes. Some of it gets lost. They brief Claude Code from memory.
-              The fix misses the point.{" "}
-              <span className="text-cream-dim">
-                (<VP /> is closing this gap next — see Cloud Share below.)
-              </span>
+              The fix misses the point.
             </p>
             <p className="text-cream font-medium">
               The gap between what you see and what your AI understands is
@@ -425,14 +411,14 @@ export default function Home() {
       <section className="border-t border-white/5 px-6 py-24">
         <div className="mx-auto max-w-3xl">
           <h2 className="text-3xl font-bold text-cream sm:text-4xl">
-            <VP /> Skips the Description
+            Show your LLM What You Mean
           </h2>
           <div className="mt-8 space-y-4 text-lg leading-relaxed">
             <p>
               Capture a sequence of screens. Narrate as you go — your voice
               transcribes on-device, anchored to the screenshot you were
               looking at when you said it. Hit Copy &amp; Send. A structured
-              markdown brief lands on your clipboard, ready for any LLM.
+              markdown LLM Spec lands on your clipboard, ready for any LLM.
             </p>
             <p className="text-cream font-medium">
               No uploads. No integrations. No UI sprawl.
@@ -477,11 +463,11 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── NEW: Not a Screenshot. A Brief. ── */}
+      {/* ── NEW: Not just screenshots. A full narrated LLM Spec ── */}
       <section className="border-t border-white/5 bg-deep-forest px-6 py-24">
         <div className="mx-auto max-w-4xl">
           <h2 className="text-center text-3xl font-bold text-cream sm:text-4xl">
-            Not a Screenshot. A Brief.
+            Not just screenshots. A full narrated LLM Spec
           </h2>
           <div className="mx-auto mt-8 max-w-3xl space-y-4 text-lg leading-relaxed">
             <p>Every other tool puts an image on your clipboard.</p>
@@ -496,7 +482,7 @@ export default function Home() {
 
           <MarkdownExample
             content={sampleMarkdown}
-            filename="transcript.md"
+            filename="VisionPipe-Spec-for-My-App-May-6-2026-10-21-AM-UTC.md"
             className="mt-12"
           />
 
@@ -512,7 +498,7 @@ export default function Home() {
       <section className="border-t border-white/5 px-6 py-24">
         <div className="mx-auto max-w-5xl">
           <h2 className="text-center text-3xl font-bold text-cream sm:text-4xl">
-            One Session. Complete Brief.
+            One Session. Complete LLM Spec.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-center text-muted">
             Six steps from hotkey to handoff.
@@ -683,10 +669,10 @@ export default function Home() {
               Send it to a developer. Drop it in Slack. Paste it in a ticket.
               The recipient opens the link, previews the session in their
               browser — screenshots, transcripts, narration, and metadata —
-              then drags the markdown brief straight into Claude Code.
+              then drags the markdown LLM Spec straight into Claude Code.
             </p>
             <p>
-              No files to manage. No context to reconstruct. The brief is
+              No files to manage. No context to reconstruct. The LLM Spec is
               intact, structured, and ready to act on.
             </p>
           </div>
@@ -937,7 +923,7 @@ export default function Home() {
       <section className="border-t border-white/5 px-6 py-24">
         <div className="mx-auto max-w-3xl text-center">
           <h2 className="text-3xl font-bold text-cream sm:text-4xl">
-            Stop Pasting Screenshots. Start Delivering Briefs.
+            Stop Pasting Screenshots. Start Delivering LLM Specs.
           </h2>
           <p className="mt-4 text-lg text-muted">
             Free for personal use. Open for contributions. Built for everyone
