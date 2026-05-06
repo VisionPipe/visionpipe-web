@@ -4,6 +4,22 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-06 19:45 UTC
+
+### Summary of changes since last update
+Small follow-up: gitignored local tooling artifacts that the Stripe CLI's "skills" feature and per-user Claude Code settings drop into the repo (`.agents/`, `.claude/skills/`, `.claude/settings.local.json`, `skills-lock.json`). These showed up as untracked after I authenticated the Stripe CLI to set Vercel env vars.
+
+### Detail of changes made:
+- `.gitignore`: appended a "Stripe CLI skills cache + per-user Claude Code settings (local tooling)" block.
+
+### Note on prior commit:
+The intended commit for the page.tsx + HeroCarousel + progress doc edits described in the previous entry got auto-bundled into `3d8e1ce Release v0.8.1` by the release script, which seems to run `git add -A` before tagging a desktop release. So the carousel "lifted out of wrapper" change, the 50% wider expansion (`max-w-[84rem]`), the "or install via command line:" lines, and the "Your LLM like Claude Code or OpenAI Codex" copy edit are all on origin under that release commit's message — not under a descriptive message of their own. Functionally fine; just a label mismatch in git history.
+
+### Potential concerns to address:
+- **The release script's `git add -A` is greedy.** Anything left in the working tree at release time gets folded into the release commit. If a future contributor leaves WIP or secrets in the tree when a release runs, those will get captured under a "Release vX.Y.Z" message. Consider scoping the release script's add to only the DMG paths it actually touches (`public/downloads/...`) and the changelog file, if any.
+
+---
+
 ## Progress Update as of 2026-05-06 19:30 UTC
 
 ### Summary of changes since last update

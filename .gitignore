@@ -29,3 +29,9 @@ tsconfig.tsbuildinfo
 
 # local backups (e.g. .backup-MMDDYY-env.local) — must never be committed
 .backup-*
+
+# Stripe CLI skills cache + per-user Claude Code settings (local tooling)
+.agents/
+.claude/skills/
+.claude/settings.local.json
+skills-lock.json
