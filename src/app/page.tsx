@@ -1,6 +1,7 @@
 import Image from "next/image";
 import CopyBlock from "@/components/CopyBlock";
 import ComingSoon from "@/components/ComingSoon";
+import ExpandableStepImage, { type StepImage } from "@/components/ExpandableStepImage";
 import HeroCarousel from "@/components/HeroCarousel";
 import MarkdownExample from "@/components/MarkdownExample";
 import WaitlistForm from "@/components/WaitlistForm";
@@ -9,38 +10,74 @@ function VP() {
   return <>Vision<span className="text-amber">|</span>Pipe</>;
 }
 
-const steps = [
+type Step = {
+  num: number;
+  title: string;
+  desc: string;
+  image?: StepImage;
+};
+
+const steps: Step[] = [
   {
     num: 1,
-    keys: "Cmd+Shift+C",
-    keysWin: "Ctrl+Shift+C",
-    title: "Press your hotkey",
-    desc: "Cmd+Shift+C activates the session window and the capture overlay. Configurable in Settings to whatever you prefer.",
+    title: "Capture any part of your screen",
+    desc: "Use a configurable hotkey if desired",
+    image: {
+      src: "/images/screenshots/welcome-onboarding.png",
+      width: 1522,
+      height: 940,
+      alt: "Vision|Pipe welcome modal showing the configurable hotkey to capture any region of your screen",
+      collapsedObjectPosition: "center",
+    },
   },
   {
     num: 2,
-    title: "Select a region",
-    desc: "Drag to capture the first screenshot. It lands as a card in the session window.",
+    title: "Give your LLM context on the screenshot",
+    desc: "Type or speak instructions to your LLM about the screenshot. Vision|Pipe transcribes on-device in real time, anchoring your words to the screenshot in front of you.",
+    image: {
+      src: "/images/screenshots/session-window-single-screenshot.png",
+      width: 3252,
+      height: 2010,
+      alt: "Vision|Pipe session window with one screenshot and its narration field side-by-side",
+      collapsedObjectPosition: "center",
+      collapsedScale: 1.5,
+    },
   },
   {
     num: 3,
-    title: "Narrate what you're seeing",
-    desc: "Speak continuously — Vision|Pipe transcribes on-device in real time, anchoring your words to the screenshot in front of you.",
+    title: "Take more screenshots to build a story for your LLM",
+    desc: "Hit your hotkey again without stopping the session. Each new capture becomes its own card with its own segment of narration. Add as many screenshots as you'd like.",
+    image: {
+      src: "/images/screenshots/app-session-split-view.png",
+      width: 3402,
+      height: 2142,
+      alt: "Vision|Pipe session view with multiple screenshots stacked vertically, each with its own narration",
+      collapsedObjectPosition: "center",
+    },
   },
   {
     num: 4,
-    title: "Take the next screenshot",
-    desc: 'Hit your hotkey again without stopping the session. Each new capture becomes its own card with its own segment of narration. Edit captions inline.',
+    title: "Copy and Share with your LLM",
+    desc: "A structured markdown bundle is written to disk and copied to your clipboard. Drag it into Claude Code or paste it anywhere. Your AI has everything — screenshots, transcripts, context, and a clear ask.",
+    image: {
+      src: "/images/screenshots/copy-and-send-toast.png",
+      width: 1432,
+      height: 590,
+      alt: "Copy & Send confirmation showing the bundle copied to clipboard with the markdown file path",
+      collapsedObjectPosition: "right center",
+    },
   },
   {
     num: 5,
-    title: "Add a closing note",
-    desc: "Summarize the ask in the closing narration field. Tell your AI exactly what you want done.",
-  },
-  {
-    num: 6,
-    title: "Hit Copy & Send",
-    desc: "A structured markdown bundle is written to disk and copied to your clipboard. Drag it into Claude Code or paste it anywhere. Your AI has everything — screenshots, transcripts, context, and a clear ask.",
+    title: "Your LLM will love you",
+    desc: "Your LLM now has vision and can clearly see everything you're trying to communicate.",
+    image: {
+      src: "/images/screenshots/claude-code-loves-llm-spec.png",
+      width: 2064,
+      height: 1066,
+      alt: "Claude Code reading a Vision|Pipe LLM Spec and praising the format: 'What a fantastic brief — I love this format'",
+      collapsedObjectPosition: "left top",
+    },
   },
 ];
 
@@ -503,7 +540,7 @@ export default function Home() {
             One Session. Complete LLM Spec.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-center text-muted">
-            Six steps from hotkey to handoff.
+            Five steps from hotkey to handoff.
           </p>
           <div className="mt-16 space-y-16">
             {steps.map((step) => (
@@ -511,16 +548,22 @@ export default function Home() {
                 key={step.num}
                 className={`flex flex-col items-center gap-8 lg:flex-row ${step.num % 2 === 0 ? "lg:flex-row-reverse" : ""}`}
               >
-                {/* Screenshot placeholder */}
-                <div className="flex w-full items-center justify-center rounded-xl border border-white/5 bg-deep-forest p-12 lg:w-1/2">
-                  <div className="text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-teal/30 text-2xl font-bold text-teal">
-                      {step.num}
+                {/* Screenshot — expandable on click, or placeholder if no image yet */}
+                <div className="w-full lg:w-1/2">
+                  {step.image ? (
+                    <ExpandableStepImage image={step.image} />
+                  ) : (
+                    <div className="flex aspect-[4/3] w-full items-center justify-center rounded-xl border border-white/5 bg-deep-forest p-12">
+                      <div className="text-center">
+                        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full border border-teal/30 text-2xl font-bold text-teal">
+                          {step.num}
+                        </div>
+                        <p className="mt-4 text-sm text-muted-dim">
+                          Screenshot or GIF goes here
+                        </p>
+                      </div>
                     </div>
-                    <p className="mt-4 text-sm text-muted-dim">
-                      Screenshot or GIF goes here
-                    </p>
-                  </div>
+                  )}
                 </div>
                 {/* Text */}
                 <div className="w-full lg:w-1/2">
@@ -532,18 +575,6 @@ export default function Home() {
                       {step.title}
                     </h3>
                   </div>
-                  {step.keys && (
-                    <div className="mt-3 flex gap-2">
-                      <kbd className="rounded-md border border-white/10 bg-forest px-2.5 py-1 font-mono text-xs text-cream">
-                        {step.keys}
-                      </kbd>
-                      <span className="text-xs text-muted-dim self-center">Mac</span>
-                      <kbd className="rounded-md border border-white/10 bg-forest px-2.5 py-1 font-mono text-xs text-cream">
-                        {step.keysWin}
-                      </kbd>
-                      <span className="text-xs text-muted-dim self-center">Windows</span>
-                    </div>
-                  )}
                   <p className="mt-3 text-base text-muted">{step.desc}</p>
                 </div>
               </div>
@@ -637,7 +668,7 @@ export default function Home() {
                 <p className="mt-4 text-sm text-muted">{p.does}</p>
                 <div className="mt-4 border-t border-white/5 pt-4">
                   <p className="text-xs font-semibold uppercase tracking-wider text-muted-dim">
-                    What arrives in Claude Code
+                    What arrives in the LLM
                   </p>
                   <p className="mt-2 text-sm text-cream">{p.delivers}</p>
                 </div>
@@ -648,7 +679,7 @@ export default function Home() {
           <p className="mx-auto mt-8 max-w-3xl text-center text-base text-muted">
             No Loom videos someone has to watch and re-describe. No
             back-and-forth Slack threads. Just a narrated session — shared as
-            a link, dragged into Claude Code, acted on.
+            a link, dragged into an LLM like Claude Code or OpenAI Codex, acted on.
           </p>
         </div>
       </section>
@@ -700,20 +731,6 @@ export default function Home() {
               </div>
             ))}
           </div>
-
-          <blockquote className="mt-12 border-l-2 border-amber pl-6 text-lg italic text-cream-dim">
-            &ldquo;The person who sees the problem and the AI that can fix it
-            no longer need a developer translator in between.&rdquo;
-          </blockquote>
-
-          <p className="mt-8 text-center text-xs text-muted-dim">
-            Sessions upload to Cloudflare R2 via a secure proxy. Links live at{" "}
-            <code className="rounded bg-deep-forest px-1.5 py-0.5 font-mono text-muted">
-              share.visionpipe.app
-            </code>{" "}
-            and are private by default. Each upload costs 50 credits ($0.50 at
-            the base pack rate).
-          </p>
 
           {/* Waitlist */}
           <div className="mx-auto mt-10 max-w-xl rounded-xl border border-amber/30 bg-forest p-6">

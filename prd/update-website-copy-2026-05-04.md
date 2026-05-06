@@ -4,6 +4,77 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-06 20:30 UTC
+
+### Summary of changes since last update
+Substantial iteration on the homepage's "How It Works" section: trimmed it from six single-shot-style steps to five session-flow steps, gave each step a real screenshot with click-to-open-modal preview, and reworded most titles/descriptions. Built a new `ExpandableStepImage` component for the modal pattern (separate from the carousel's inline-expansion pattern), wired four new screenshots into the steps + renamed them, plus a handful of small copy edits across `/`, `/pricing`, and the footer, plus a layout fix on the credit pack cards.
+
+### Detail of changes made:
+
+**New `src/components/ExpandableStepImage.tsx` (~110 lines, client component):**
+- Renders a fixed `aspect-[4/3]` thumbnail with `object-cover` + per-image `object-position` (defaults to `center`; can be set to `right center`, `left top`, etc. to focus on the most relevant region of a wider source image).
+- Optional `collapsedScale` factor applies a CSS `transform: scale(...)` to the thumbnail so a single image can serve as a wide overview AND a tighter zoom — used for step 2 with `collapsedScale: 1.5`.
+- On click, opens a portal-rendered modal: dark backdrop + 8px blur, image at natural aspect via `width`/`height` props with `max-h-[88vh] max-w-[92vw]`, X-button top-right with focus ring, close on Esc / click outside / X. Body scroll locked while open via `document.body.style.overflow = "hidden"` (cleanup on unmount and on close).
+- `mounted` flag + `createPortal` guard so the portal is browser-only and the SSR pass doesn't try to access `document.body`.
+
+**Initial design was inline expansion (mirroring the carousel)** — built it that way first, then user requested modal. Refactored. Inline-expansion code path is gone.
+
+**Step images wired (5 of 5):**
+1. Step 1 (Capture) → `welcome-onboarding.png` (1522×940), `objectPosition: center`. Tells the "press hotkey to start" story via the welcome modal's hotkey display.
+2. Step 2 (Give your LLM context on the screenshot) → `session-window-single-screenshot.png` (3252×2010), `objectPosition: center`, `collapsedScale: 1.5`. The 1.5x scale crops in tighter on the screenshot card + narration field for the thumbnail.
+3. Step 3 (Take more screenshots) → `app-session-split-view.png` (3402×2142), `objectPosition: center`. Same image as carousel step 1 — intentional visual continuity.
+4. Step 4 (Copy and Share with your LLM) → `copy-and-send-toast.png` (1432×590), `objectPosition: right center`. The toast image is very wide (2.43:1); right-anchoring focuses the Copy & Send button in the 4:3 thumbnail.
+5. Step 5 (Your LLM will love you) → `claude-code-loves-llm-spec.png` (2064×1066), `objectPosition: left top`. The screenshot shows Claude Code praising a Vision|Pipe LLM Spec ("What a fantastic brief — I love this format..."). Left-top anchor focuses on the praise text.
+
+**Type consolidation:** `StepImage` type lives in `ExpandableStepImage.tsx` and is imported by `page.tsx`. Previously a duplicate `StepImageData` type in `page.tsx` drifted out of sync when I added `collapsedScale` and caused a TS error. Single source of truth now.
+
+**Screenshots renamed (in `public/images/screenshots/`):**
+- `Zight 2026-05-06 at 12.40.12 PM.png` → `welcome-onboarding.png`
+- `F06_Mac.png (6016×3900) 2026-05-06 at 12.40.41 PM.png` → `history-hub.png` (currently unused on the site but staged for future use)
+- `VisionPipe 2026-05-06 at 12.45.08 PM.png` → `session-window-single-screenshot.png`
+- `✳ Test VisionPipe screenshot bundle analysis 2026-05-06 at 1.10.24 PM.png` → `claude-code-loves-llm-spec.png`
+
+**"How It Works" section rewrite (`src/app/page.tsx`):**
+- Step 1 title: `"Press your hotkey"` → `"Capture any part of your screen"`. Description: `"Cmd+Shift+C activates the session window..."` → `"Use a configurable hotkey if desired"`. Also removed the `keys` / `keysWin` data fields and the `<kbd>` row that rendered them — keyboard shortcut display is no longer there.
+- Step 2 title: `"Select a region"` (entire step REMOVED — drag-to-select-region was a single-shot framing that doesn't fit the session flow).
+- Step 2 (was step 3) title: `"Narrate what you're seeing"` → `"Give your LLM context"` → (later) `"Give your LLM context on the screenshot"`. Description: rewritten to `"Type or speak instructions to your LLM about the screenshot. Vision|Pipe transcribes on-device in real time, anchoring your words to the screenshot in front of you."`
+- Step 3 (was step 4) title: `"Take the next screenshot"` → `"Take more screenshots to build a story for your LLM"`. Description tail: `"...Edit captions inline."` → `"...Add as many screenshots as you'd like."`
+- Step 4 (was step 5) title: `"Add a closing note"` (entire step REMOVED — closing narration is in the app but wasn't earning its place on the marketing page).
+- Step 4 (was step 6) title: `"Hit Copy & Send"` → `"Copy and Share with your LLM"`.
+- New Step 5 added: `"Your LLM will love you"` with description `"Your LLM now has vision and can clearly see everything you're trying to communicate."` Image is the Claude Code "love letter" screenshot.
+- Section subhead: `"Six steps from hotkey to handoff."` → went through `"Five steps"` → `"Four steps"` → back to `"Five steps"` as steps were removed and the new step 5 was added.
+
+**Other homepage copy edits (`src/app/page.tsx`):**
+- `"What arrives in Claude Code"` → `"What arrives in the LLM"` (persona-card column header in the "Give Your Developers Vision" section).
+- `"dragged into Claude Code, acted on."` → `"dragged into an LLM like Claude Code or OpenAI Codex, acted on."` (subtext below the persona cards).
+- Removed the pull quote: `"The person who sees the problem and the AI that can fix it no longer need a developer translator in between."` (was a `<blockquote>` in the Share It. Ship It. section).
+- Removed the technical credibility footer paragraph: `"Sessions upload to Cloudflare R2 via a secure proxy. Links live at share.visionpipe.app and are private by default. Each upload costs 50 credits ($0.50 at the base pack rate)."` (Share It section). The implementation details were redundant with the section's value framing and probably premature given Cloud Share isn't shipped.
+
+**Pricing page (`src/app/pricing/page.tsx`):**
+- `"Ready to give your LLM eyes?"` → `"Ready to give your LLM vision?"`.
+- `"Local-only use is always free"` → `"Personal use is always free"` (2 occurrences: free-tier card bullet and bottom CTA copy).
+
+**Footer (`src/components/Footer.tsx`):**
+- `"The missing primitive between your screen and your AI."` → `"The missing link between your screen and your AI."`. "Primitive" was tech-speak; "link" is plainer.
+
+**Credit pack card layout fix (`src/components/CreditPackCard.tsx`):**
+- Cards have variable content height (the "1,000 credits" pack has no `+X% bonus` line, so it's one row shorter than the other three). The Buy button used `mt-6` (fixed top margin), so on the shorter card it sat one row higher than the other buttons.
+- Wrapped the button + error message in a `<div className="mt-auto pt-6">`. `mt-auto` in a flex-col container pushes the wrapper to the bottom; `pt-6` preserves the visual breathing room above the button. The button itself gets `w-full` since it's no longer a direct flex child (which previously stretched it via flex's default `align-items: stretch`).
+
+### Verification performed:
+- `npx tsc --noEmit` clean.
+- Visual confirmation in dev server: How It Works section now renders 5 steps with thumbnails; clicking opens modal; modal closes via X / Esc / backdrop click; body scroll lock works.
+- Modal portal renders at `document.body` (escapes any parent stacking context).
+
+### Potential concerns to address:
+- **`history-hub.png` is staged but unused** on the site. Not deleted because it'll likely fit a future "see your past sessions" section. If that section never materializes, it's worth deleting as a follow-up cleanup.
+- **The release script's `git add -A` is still greedy.** Since the last entry, the script committed Release v0.8.2 (DMG-only, no working-tree pollution this time — relief). The current working tree has VisionPipe-0.9.0.dmg + an updated `VisionPipe.dmg` symlink, presumably from a v0.9.0 release in progress. I'm explicitly NOT staging those in this commit; the release script will sweep them up next time it runs.
+- **`session-window-single-screenshot.png` at `collapsedScale: 1.5`** crops in pretty aggressively. On smaller viewports the thumbnail may show only part of the screenshot card without the narration field beside it. If user reports it looks weird at narrow widths, dial the scale to 1.25–1.3 or set a different `collapsedObjectPosition`.
+- **The modal does not use a focus trap.** Pressing Tab while open will focus elements outside the modal. For accessibility-strict needs, add `react-focus-lock` or implement a small focus trap. Acceptable for marketing use; flag if accessibility audit is a near-term priority.
+- **No animation on modal open/close.** Uses default React rendering — appears/disappears instantly. Easy to add a fade with `tailwindcss-animate` plugin or a state-based opacity transition if you want polish.
+
+---
+
 ## Progress Update as of 2026-05-06 19:45 UTC
 
 ### Summary of changes since last update

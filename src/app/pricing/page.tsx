@@ -147,7 +147,7 @@ export default function PricingPage() {
 
             <ul className="mt-8 flex-1 space-y-3">
               {[
-                "Local-only use is always free — no account, no credits required",
+                "Personal use is always free — no account, no credits required",
                 "Personal projects and hobby work",
                 "Learning and experimentation",
                 "Open source contributions",
@@ -267,10 +267,10 @@ export default function PricingPage() {
       <section className="border-t border-white/5 px-6 py-24">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-2xl font-bold text-cream">
-            Ready to give your LLM eyes?
+            Ready to give your LLM vision?
           </h2>
           <p className="mt-4 text-muted">
-            Local-only use is always free.{" "}
+            Personal use is always free.{" "}
             <span className="text-cream-dim">Cloud Share (coming soon) is opt-in.</span>
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">

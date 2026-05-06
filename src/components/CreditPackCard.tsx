@@ -41,14 +41,16 @@ export function CreditPackCard({ pack, bonusPercent }: Props) {
       {bonusPercent > 0 && (
         <p className="mt-2 text-sm font-semibold text-amber">+{bonusPercent}% bonus</p>
       )}
-      <button
-        onClick={handleBuy}
-        disabled={loading}
-        className="mt-6 rounded bg-teal px-4 py-2 font-semibold text-cream hover:bg-teal/90 disabled:opacity-50"
-      >
-        {loading ? 'Redirecting...' : `Buy ${pack.credits.toLocaleString()} credits`}
-      </button>
-      {error && <p className="mt-2 text-sm text-burnt-sienna">{error}</p>}
+      <div className="mt-auto pt-6">
+        <button
+          onClick={handleBuy}
+          disabled={loading}
+          className="w-full rounded bg-teal px-4 py-2 font-semibold text-cream hover:bg-teal/90 disabled:opacity-50"
+        >
+          {loading ? 'Redirecting...' : `Buy ${pack.credits.toLocaleString()} credits`}
+        </button>
+        {error && <p className="mt-2 text-sm text-burnt-sienna">{error}</p>}
+      </div>
     </div>
   );
 }

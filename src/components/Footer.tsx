@@ -11,7 +11,7 @@ export default function Footer() {
               Vision<span className="text-amber">|</span>Pipe
             </span>
             <p className="mt-3 text-sm text-muted">
-              The missing primitive between your screen and your AI.
+              The missing link between your screen and your AI.
             </p>
           </div>
 
