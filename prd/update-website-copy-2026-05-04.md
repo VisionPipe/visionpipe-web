@@ -4,6 +4,23 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-06 21:45 UTC
+
+### Summary of changes since last update
+Removed two pieces of copy from the homepage that the founder felt were redundant or off-message: the "Voice + caption today. Drawing returning soon." callout under the multi-modal annotation cards, and the "No Loom videos..." subtext below the persona cards in the "Give Your Developers Vision" section.
+
+### Detail of changes made:
+- `src/app/page.tsx`: removed the entire `<div className="mt-8 rounded-xl border border-teal/20 bg-forest p-6 text-center">` callout box that contained "Voice + caption today. Drawing returning soon. Your narration travels with the screenshot it describes; your captions name each one; the full bundle is one paste away." It sat just below the Speak It / Caption It / Draw It cards.
+- `src/app/page.tsx`: removed the subtext paragraph "No Loom videos someone has to watch and re-describe. No back-and-forth Slack threads. Just a narrated session — shared as a link, dragged into an LLM like Claude Code or OpenAI Codex, acted on." It sat below the PM/Designer/QA persona cards in the cross-functional pivot section.
+
+### Note on production migration:
+Founder applied `drizzle/0001_broken_jackpot.sql` directly via the Neon dashboard SQL editor (because Vercel Production env vars are marked Sensitive — `vercel env pull --environment=production` returns empty values, so I couldn't fetch the prod `DATABASE_URL` to run `drizzle-kit migrate` myself). The waitlist table now exists in prod; `/api/waitlist` will work end-to-end against the live DB; signup notifications will land in `hello@visionpipe.ai` via Resend. Drizzle's `__drizzle_migrations` table does NOT have an entry for `0001_broken_jackpot` — if anyone runs `drizzle-kit migrate` in the future, it'll try to re-create the table and fail. Fix at that time by manually inserting a row into `__drizzle_migrations`.
+
+### Potential concerns to address:
+- **Localhost / Preview cannot exercise the waitlist form** without a real `DATABASE_URL`. The local `.env.local` and Vercel Preview env both still have the placeholder Postgres URL I set when first wiring up the env vars. Submitting on localhost returns HTTP 500 ("Could not record signup"). Either: (a) paste the prod Neon URL into `.env.local` for local testing (caveat: test signups land in the prod waitlist table — easy to delete), or (b) create a separate Neon dev branch and use that URL for local + Preview (proper isolation, more setup).
+
+---
+
 ## Progress Update as of 2026-05-06 21:30 UTC
 
 ### Summary of changes since last update

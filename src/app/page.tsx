@@ -631,15 +631,6 @@ export default function Home() {
             ))}
           </div>
 
-          <div className="mt-8 rounded-xl border border-teal/20 bg-forest p-6 text-center">
-            <p className="text-sm text-muted">
-              <span className="font-medium text-cream">
-                Voice + caption today. Drawing returning soon.
-              </span>{" "}
-              Your narration travels with the screenshot it describes; your
-              captions name each one; the full bundle is one paste away.
-            </p>
-          </div>
         </div>
       </section>
 
@@ -690,11 +681,6 @@ export default function Home() {
             ))}
           </div>
 
-          <p className="mx-auto mt-8 max-w-3xl text-center text-base text-muted">
-            No Loom videos someone has to watch and re-describe. No
-            back-and-forth Slack threads. Just a narrated session — shared as
-            a link, dragged into an LLM like Claude Code or OpenAI Codex, acted on.
-          </p>
         </div>
       </section>
 
