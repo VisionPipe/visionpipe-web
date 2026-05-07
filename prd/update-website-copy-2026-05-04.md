@@ -4,6 +4,25 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-06 22:00 UTC
+
+### Summary of changes since last update
+Catch-up commit for seven DMG release artifacts that piled up in the working tree (v0.9.0 → v0.9.5 + v0.10.0) without being committed. These are produced by the release script that normally commits each one as `Release vX.Y.Z`, but it didn't run cleanly between commits this session — probably because I had so many small edits in flight when each release happened that the script's `git add -A` got skipped or the script failed silently. Committing as a single chore so the working tree is clean, rather than reproducing seven release messages retroactively.
+
+### Detail of changes made:
+- Staged + committed: `public/downloads/VisionPipe-0.9.0.dmg`, `VisionPipe-0.9.1.dmg`, `VisionPipe-0.9.2.dmg`, `VisionPipe-0.9.3.dmg`, `VisionPipe-0.9.4.dmg`, `VisionPipe-0.9.5.dmg`, `VisionPipe-0.10.0.dmg`, plus the modified `VisionPipe.dmg` symlink (now points at v0.10.0).
+
+### Note on local dev waitlist setup (out of band, no repo changes):
+- `.env.local` was updated to point `DATABASE_URL` at a dev Neon branch the founder created. The dev branch was forked from prod *after* `0001_broken_jackpot.sql` was applied via the Neon dashboard, so it already has all 5 tables (organizations, memberships, purchases, webhook_events, waitlist) — running `drizzle-kit migrate` against it errors with "relation already exists", which is fine: the schema is correct, runtime works.
+- Verified end-to-end: `curl -X POST localhost:3000/api/waitlist` returned 200, row landed in dev DB.
+- Email notification doesn't fire locally (`RESEND_API_KEY=re_dummy` in `.env.local`); the route logs a warning but otherwise succeeds.
+
+### Potential concerns to address:
+- **The release script appears to be drifting.** Seven uncommitted DMGs in a row suggests something's off with whatever automation usually commits them. Worth investigating: does the script run from a watcher? A manual `npm run release` step? CI? If it runs `git add -A && git commit -m "Release vX.Y.Z"` it would have caught these — unless it bailed because of dirty tree state at the time. Future sessions should expect the script may need a poke.
+- **Vercel Preview's `DATABASE_URL` is still the placeholder.** If you want Preview deploys to exercise the waitlist form too, swap Preview's `DATABASE_URL` to the dev Neon branch via `vercel env rm DATABASE_URL preview && vercel env add DATABASE_URL preview` (paste the dev URL when prompted). Until then, only local + production have a working DB; Preview returns 500.
+
+---
+
 ## Progress Update as of 2026-05-06 21:45 UTC
 
 ### Summary of changes since last update
