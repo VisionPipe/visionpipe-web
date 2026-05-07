@@ -48,3 +48,14 @@ export const webhookEvents = pgTable('webhook_events', {
   payload: jsonb('payload').notNull(),
   processedAt: timestamp('processed_at', { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const waitlist = pgTable('waitlist', {
+  id: bigserial('id', { mode: 'number' }).primaryKey(),
+  email: text('email').notNull(),
+  feature: text('feature').notNull(),
+  source: text('source'),
+  userAgent: text('user_agent'),
+  createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+}, (table) => ({
+  uniqueEmailFeature: uniqueIndex('waitlist_email_feature_unique').on(table.email, table.feature),
+}));

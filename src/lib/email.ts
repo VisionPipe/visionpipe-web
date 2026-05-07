@@ -24,3 +24,22 @@ export async function sendDisputeAlert(disputeId: string, amount: number): Promi
     html: `<p>A new dispute was opened: <code>${disputeId}</code> for ${amount / 100} USD.</p>`,
   });
 }
+
+export async function sendWaitlistNotification(
+  feature: string,
+  email: string,
+  source?: string,
+): Promise<void> {
+  if (!resend) {
+    console.warn(
+      `RESEND_API_KEY not set; waitlist signup would have been emailed: ${feature} ← ${email}`,
+    );
+    return;
+  }
+  await resend.emails.send({
+    from: 'VisionPipe <hello@visionpipe.ai>',
+    to: 'hello@visionpipe.ai',
+    subject: `[VisionPipe] Waitlist signup: ${feature}`,
+    html: `<p>New <strong>${feature}</strong> waitlist signup: <code>${email}</code>${source ? ` (from ${source})` : ''}.</p>`,
+  });
+}

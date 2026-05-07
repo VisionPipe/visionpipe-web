@@ -8,10 +8,10 @@ export default function Footer() {
           {/* Brand */}
           <div className="lg:col-span-1">
             <span className="text-lg font-semibold text-cream">
-              Vision<span className="text-teal">|Pipe</span>
+              Vision<span className="text-amber">|</span>Pipe
             </span>
             <p className="mt-3 text-sm text-muted">
-              The missing primitive between your screen and your AI.
+              The missing link between your screen and your AI.
             </p>
           </div>
 
@@ -123,7 +123,7 @@ export default function Footer() {
               Built with the Unix philosophy: do one thing, do it well.
             </p>
             <p className="text-sm text-muted-dim">
-              &copy; {new Date().getFullYear()} Vision<span className="text-teal">|</span>Pipe. Free for personal
+              &copy; {new Date().getFullYear()} Vision<span className="text-amber">|</span>Pipe. Free for personal
               use.
             </p>
           </div>

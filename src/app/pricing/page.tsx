@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 function VP() {
-  return <>Vision<span className="text-teal">|</span>Pipe</>;
+  return <>Vision<span className="text-amber">|</span>Pipe</>;
 }
 
 const faqs: { q: ReactNode; a: ReactNode }[] = [
@@ -56,10 +56,10 @@ const faqs: { q: ReactNode; a: ReactNode }[] = [
           href="#credit-packs"
           className="text-cream underline hover:text-teal"
         >
-          Buy Credits
+          Buy a credit pack
         </a>
-        . Each credit pack includes a commercial license for the credits you
-        purchase.
+        . Each credit costs $0.01 and includes a commercial license for the
+        work you send. No subscription, no per-seat fees.
       </>
     ),
   },
@@ -67,15 +67,46 @@ const faqs: { q: ReactNode; a: ReactNode }[] = [
     q: "Do I need an account or API key?",
     a: (
       <>
-        No. <VP /> runs entirely on your machine with no cloud dependency. There
-        are no accounts, no API keys, and no data ever leaves your device (voice
-        transcription is on-device via Whisper).
+        For local use, no — no account, no API keys, nothing leaves your Mac.
+        Voice transcription runs on-device via Apple Speech.{" "}
+        <span className="text-cream-dim">
+          (An account is required for the upcoming Cloud Share feature, which
+          lets you upload sessions to a private link for teammates to view.)
+        </span>
       </>
     ),
   },
   {
     q: "What platforms are supported?",
-    a: "Mac (macOS 13 Ventura and later) and Windows (Windows 10 build 19041+). Linux support is on the roadmap.",
+    a: "Mac (Apple Silicon, macOS 13 Ventura and later) ships today. Windows and Linux support are on the roadmap.",
+  },
+  {
+    q: (
+      <>
+        How does Cloud Share work?{" "}
+        <span className="ml-1 inline-flex items-center rounded-full border border-amber/40 bg-amber/10 px-2 py-0.5 align-middle text-[10px] font-semibold uppercase tracking-wider text-amber">
+          Coming soon
+        </span>
+      </>
+    ),
+    a: (
+      <>
+        Record a session, click &ldquo;Save to Cloud,&rdquo; and <VP /> uploads
+        the full session — screenshots, transcripts, narration — to secure
+        cloud storage. You receive a private link at{" "}
+        <code className="rounded bg-forest px-1.5 py-0.5 font-mono text-xs text-cream-dim">
+          share.visionpipe.app
+        </code>
+        . Anyone with the link can preview the session in their browser or
+        download the markdown LLM Spec. Each upload costs 50 credits ($0.50).{" "}
+        <a
+          href="/#features"
+          className="text-cream underline hover:text-teal"
+        >
+          Get on the waitlist →
+        </a>
+      </>
+    ),
   },
 ];
 
@@ -95,6 +126,9 @@ export default function PricingPage() {
             triggered by revenue — not intent. If you&rsquo;re not making money
             with it, you don&rsquo;t pay.
           </p>
+          <p className="mx-auto mt-4 max-w-xl text-base text-teal">
+            1 credit = $0.01. Pay only for what you actually send.
+          </p>
         </div>
       </section>
 
@@ -113,6 +147,7 @@ export default function PricingPage() {
 
             <ul className="mt-8 flex-1 space-y-3">
               {[
+                "Personal use is always free — no account, no credits required",
                 "Personal projects and hobby work",
                 "Learning and experimentation",
                 "Open source contributions",
@@ -150,42 +185,54 @@ export default function PricingPage() {
           <div className="flex flex-col rounded-2xl border border-amber/30 bg-deep-forest p-8">
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-amber">
-                Commercial
+                Pay-as-you-go credits
               </h2>
               <p className="mt-4 text-4xl font-bold text-cream">
-                Buy Credits
+                $0.01<span className="text-lg text-muted"> / credit</span>
               </p>
               <p className="mt-2 text-sm text-muted">
-                Flexible pricing for teams and businesses.
+                Each credit covers a piece of work you send. Take as many
+                screenshots as you want, re-record audio, delete what you
+                don&rsquo;t like — none of it costs anything until you click{" "}
+                <span className="font-semibold text-cream">Copy &amp; Send</span>.
               </p>
             </div>
 
-            <ul className="mt-8 flex-1 space-y-3">
-              {[
-                "Use at a business or company",
-                "Revenue-generating products or workflows",
-                "Client work and consulting",
-                "Commercial websites and applications",
-                "Priority support and guidance",
-              ].map((item) => (
-                <li key={item} className="flex gap-3 text-sm text-muted">
-                  <svg
-                    className="mt-0.5 h-4 w-4 shrink-0 text-amber"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth={2}
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M5 13l4 4L19 7"
-                    />
-                  </svg>
-                  {item}
-                </li>
-              ))}
-            </ul>
+            <div className="mt-6 overflow-hidden rounded-lg border border-white/10">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="border-b border-white/10 bg-forest/40">
+                    <th className="px-3 py-2 text-left font-semibold text-cream">
+                      What you sent
+                    </th>
+                    <th className="px-3 py-2 text-right font-semibold text-cream">
+                      Cost
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="text-muted">
+                  {[
+                    ["1 screenshot, no audio", "1 credit ($0.01)"],
+                    ["3 screenshots, 5s narration", "3 credits ($0.03)"],
+                    ["5 screenshots, 47s narration", "9 credits ($0.09)"],
+                    ["1 screenshot, 2 min narration", "12 credits ($0.12)"],
+                  ].map(([what, cost]) => (
+                    <tr key={what} className="border-b border-white/5 last:border-0">
+                      <td className="px-3 py-2">{what}</td>
+                      <td className="px-3 py-2 text-right font-mono text-cream">
+                        {cost}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="mt-4 text-xs text-muted-dim">
+              First 10 seconds of audio per session is free. After that,
+              1 credit per 10 seconds (rounded up). On-device transcription
+              is always free — your audio doesn&rsquo;t leave your Mac.
+            </p>
 
             <a
               href="#credit-packs"
@@ -220,11 +267,11 @@ export default function PricingPage() {
       <section className="border-t border-white/5 px-6 py-24">
         <div className="mx-auto max-w-2xl text-center">
           <h2 className="text-2xl font-bold text-cream">
-            Ready to give your LLM eyes?
+            Ready to give your LLM vision?
           </h2>
           <p className="mt-4 text-muted">
-            Free for personal use. No accounts, no API keys, no cloud
-            dependency.
+            Personal use is always free.{" "}
+            <span className="text-cream-dim">Cloud Share (coming soon) is opt-in.</span>
           </p>
           <div className="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <a

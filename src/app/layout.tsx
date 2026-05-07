@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, Source_Code_Pro } from "next/font/google";
+import { Caveat, IBM_Plex_Sans, Source_Code_Pro } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
@@ -16,6 +16,13 @@ const sourceCodePro = Source_Code_Pro({
   subsets: ["latin"],
   weight: ["400", "500", "600"],
   variable: "--font-mono",
+  display: "swap",
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  variable: "--font-handwritten",
   display: "swap",
 });
 
@@ -40,7 +47,7 @@ export default function RootLayout({
     <ClerkProvider>
       <html
         lang="en"
-        className={`${ibmPlexSans.variable} ${sourceCodePro.variable}`}
+        className={`${ibmPlexSans.variable} ${sourceCodePro.variable} ${caveat.variable}`}
       >
         <body className="font-sans antialiased">
           <Header />

@@ -21,13 +21,14 @@ export default function DownloadPage() {
           className="mx-auto mb-8"
         />
         <h1 className="text-4xl font-bold tracking-tight text-cream sm:text-5xl">
-          Download Vision<span className="text-teal">|</span>Pipe
+          Download Vision<span className="text-amber">|</span>Pipe
         </h1>
         <p className="mt-4 font-mono text-base text-teal sm:text-lg">
           screenshot | llm — now a reality.
         </p>
         <p className="mx-auto mt-6 max-w-xl text-base text-muted">
-          Free for personal use. No accounts, no API keys, no cloud dependency.
+          Free for personal use. Voice transcription runs on-device — your
+          audio doesn&rsquo;t leave your Mac.
         </p>
 
         <div className="mt-12 flex flex-col items-center gap-4">
@@ -55,7 +56,7 @@ export default function DownloadPage() {
           />
 
           <p className="mt-4 text-sm text-muted-dim">
-            Windows support coming soon
+            Apple Silicon today. Windows on the roadmap.
           </p>
         </div>
 

@@ -20,7 +20,7 @@ export default function Header() {
             className="h-8 w-8"
           />
           <span className="text-lg font-semibold text-cream">
-            Vision<span className="text-teal">|Pipe</span>
+            Vision<span className="text-amber">|</span>Pipe
           </span>
         </Link>
 
