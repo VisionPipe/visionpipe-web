@@ -4,6 +4,19 @@ This branch rewrites the website copy across `/`, `/pricing`, and `/download` to
 
 ---
 
+## Progress Update as of 2026-05-07 12:00 UTC
+
+### Summary of changes since last update
+Catch-up commit for one more uncommitted desktop release artifact (`v0.10.3`) that the release script left in the working tree. Same pattern as the previous v0.9.0 → v0.10.2 batch.
+
+### Detail of changes made:
+- Staged + committed: `public/downloads/VisionPipe-0.10.3.dmg` (new) and the modified `public/downloads/VisionPipe.dmg` symlink (now points at v0.10.3).
+
+### Potential concerns to address:
+- **Release script is still drifting.** Two consecutive sessions now where I've had to manually sweep up DMGs. If this keeps happening, worth poking at the release script to figure out why it's not committing each release.
+
+---
+
 ## Progress Update as of 2026-05-06 22:00 UTC
 
 ### Summary of changes since last update
